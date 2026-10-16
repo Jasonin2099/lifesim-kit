@@ -1,0 +1,33 @@
+# lifesim-kit
+
+[中文](README.md) · [English](README.en.md)
+
+テキストで遊ぶ「人生シミュレーション」用の小さなエンジンです。シナリオはすべて JSON に書き、エンジンはイベントを引いて、数値を動かして、エンディングを決めるだけ。依存ゼロで、ブラウザでも Node でも動きます。
+
+**[デモで遊ぶ →](https://jasonin2099.github.io/lifesim-kit/)**（サンプル：『入社半年』、1 回 3 分ほど。表示は中国語／英語）
+
+> 以前作った人生シミュゲームから骨組みだけ取り出したものです。サンプルのシナリオは新しく書きました。まだ粗削りです。
+
+## 中身
+
+- `engine/`：数百行
+  - ターン制。そのターンの固定イベント → イベントプールから重み付きで `perTurn` 件
+  - 共通の条件記法：`{stat, min, max}` `{flag}` `{turn}` `{seen}` `{all|any|not}`
+  - 成功率つきの選択肢（`chance` + `success` / `failure`）、幅のある効果（`[lo, hi]`）
+  - シード付き乱数。状態はセーブに入るので、ロード後も同じ乱数列が続きます
+  - `validatePack()` が数値名のタイプミス・ID 重複・フォールバックエンディング漏れを検出
+- `tools/simulate.mjs`：ボットに千回ずつ遊ばせて、エンディング分布・数値の中央値・一度も出なかったイベントを表示
+- `packs/first-job/`：サンプルシナリオ
+- `index.html` + `demo/`：そのまま GitHub Pages に置ける遊べるページ
+
+## 動かす
+
+```bash
+npm test
+npm run simulate
+npm run serve     # http://localhost:8000
+```
+
+JSON の書き方は[中国語版 README](README.md#写自己的剧本) の例を見てください（キーは共通）。
+
+ロードマップ：[ROADMAP.md](ROADMAP.md) ・ MIT License
