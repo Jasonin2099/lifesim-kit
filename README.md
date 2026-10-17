@@ -32,11 +32,12 @@ npm run serve            # 打开 http://localhost:8000
 
 ```
 [max-skill] 1000 runs
-   51%  Made it
-   49%  Passed
-  median: energy 60 · mood 70 · skill 39 · money 1160
+   50%  Passed
+   29%  Made it
+   21%  Next stop
+  median: energy 60 · mood 68 · skill 39 · money 1160
 
-never seen events: cold, burnout
+never seen events: none
 unreached endings: burned_out
 ```
 

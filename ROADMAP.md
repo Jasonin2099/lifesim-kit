@@ -3,7 +3,7 @@
 Small steps, roughly one per day.
 
 - [ ] Add GitHub Actions CI (test.yml is ready, needs a token with `workflow` scope)
-- [ ] Sample pack: make `cold` and `burnout` reachable (the simulator says nobody sees them)
+- [x] Sample pack: make `cold` and `burnout` reachable (the simulator says nobody sees them)
 - [ ] Sample pack: make the `burned_out` ending reachable by a reckless bot
 - [ ] Simulator: add a `reckless` bot (always the choice with the biggest total delta)
 - [ ] Simulator: `--bot` flag to run only one bot

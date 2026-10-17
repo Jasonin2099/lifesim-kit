@@ -31,7 +31,7 @@
       "title": { "zh": "下班前的 bug", "en": "A bug at 5:55" },
       "text": { "zh": "五点五十五，测试群里有人@你。", "en": "5:55 pm. Someone tags you in the QA channel." },
       "choices": [
-        { "label": { "zh": "留下来修", "en": "Stay and fix it" }, "effect": { "skill": 5, "energy": -12 }, "result": { "zh": "修完已经九点，地铁很空。", "en": "Fixed by nine. The train is empty." } },
+        { "label": { "zh": "留下来修", "en": "Stay and fix it" }, "effect": { "skill": 5, "energy": -12, "mood": -2 }, "result": { "zh": "修完已经九点，地铁很空。", "en": "Fixed by nine. The train is empty." } },
         { "label": { "zh": "明早再说", "en": "Tomorrow" }, "effect": { "mood": 2 }, "result": { "zh": "第二天它自己好了。没人知道为什么。", "en": "Next morning it's gone. Nobody knows why." } }
       ] },
     { "id": "course", "turns": [2, 5], "when": { "stat": "money", "min": 400 },
@@ -65,7 +65,7 @@
         { "label": { "zh": "帮忙", "en": "Help" }, "effect": { "energy": -6, "skill": 4, "mood": 4, "flag": "friend" }, "result": { "zh": "他请你喝了一周的咖啡。", "en": "Free coffee for a week." } },
         { "label": { "zh": "推荐一篇文章", "en": "Send a link" }, "effect": { "mood": -1 }, "result": { "zh": "他说：「好，我看看。」", "en": "\"Thanks, I'll take a look.\"" } }
       ] },
-    { "id": "cold", "turns": [3, 6], "when": { "stat": "energy", "max": 40 },
+    { "id": "cold", "turns": [3, 6], "when": { "stat": "energy", "max": 55 },
       "title": { "zh": "感冒", "en": "Caught a cold" },
       "text": { "zh": "嗓子从早上开始就不太对。", "en": "Your throat has felt off since this morning." },
       "choices": [
@@ -88,7 +88,7 @@
         { "label": { "zh": "聊聊看", "en": "Hear them out" }, "effect": { "mood": 3, "flag": "has_offer" }, "result": { "zh": "你多了一个选项。", "en": "Now you have options." } },
         { "label": { "zh": "婉拒", "en": "Decline" }, "effect": { "mood": 1 }, "result": { "zh": "先把这里的事做完。", "en": "Finish what you started here first." } }
       ] },
-    { "id": "burnout", "turns": [2, 6], "when": { "stat": "mood", "max": 25 }, "weight": 3,
+    { "id": "burnout", "turns": [2, 6], "when": { "any": [{ "stat": "mood", "max": 50 }, { "stat": "energy", "max": 45 }] }, "weight": 3,
       "title": { "zh": "周日晚上", "en": "Sunday night" },
       "text": { "zh": "想到明天要上班，胃有点紧。", "en": "Thinking about tomorrow makes your stomach tight." },
       "choices": [

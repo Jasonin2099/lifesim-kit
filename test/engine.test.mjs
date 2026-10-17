@@ -60,3 +60,11 @@ test('unavailable choice is rejected', () => {
   assert.equal(g.choices().length, 1);
   assert.throws(() => g.choose(1));
 });
+
+test('every sample-pack event is seen by some bot', () => {
+  const bots = [strategies.random, strategies.first, ...Object.keys(pack.stats).map((k) => strategies.greedy(k))];
+  const seen = new Set();
+  for (const bot of bots) for (let i = 0; i < 300; i++) for (const id of playRun(pack, bot, i).state.seen) seen.add(id);
+  const never = pack.events.map((e) => e.id).filter((id) => !seen.has(id));
+  assert.deepEqual(never, []);
+});
