@@ -1,5 +1,7 @@
 # lifesim-kit
 
+[![license](https://img.shields.io/github/license/Jasonin2099/lifesim-kit?style=flat&color=555)](LICENSE) [![last commit](https://img.shields.io/github/last-commit/Jasonin2099/lifesim-kit?style=flat&color=555)](https://github.com/Jasonin2099/lifesim-kit/commits) [![demo](https://img.shields.io/badge/demo-GitHub%20Pages-555?style=flat)](https://jasonin2099.github.io/lifesim-kit/) [![stars](https://img.shields.io/github/stars/Jasonin2099/lifesim-kit?style=flat&color=555)](https://github.com/Jasonin2099/lifesim-kit/stargazers)
+
 [English](README.en.md) · [日本語](README.ja.md)
 
 一个很小的「人生模拟」文字游戏引擎。剧情全写在 JSON 里，引擎只管抽事件、算数值、判结局。零依赖，浏览器和 Node 都能跑。
