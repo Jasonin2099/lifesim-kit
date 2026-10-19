@@ -5,7 +5,7 @@ Small steps, roughly one per day.
 - [ ] Add GitHub Actions CI (test.yml is ready, needs a token with `workflow` scope)
 - [x] Sample pack: make `cold` and `burnout` reachable (the simulator says nobody sees them)
 - [ ] Sample pack: make the `burned_out` ending reachable by a reckless bot
-- [ ] Simulator: add a `reckless` bot (always the choice with the biggest total delta)
+- [x] Simulator: add a `reckless` bot (always the choice with the biggest total delta)
 - [ ] Simulator: `--bot` flag to run only one bot
 - [ ] Simulator: per-turn stat curve (median per turn) in the JSON report
 - [ ] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)

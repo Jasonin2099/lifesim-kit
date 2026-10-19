@@ -11,6 +11,14 @@ export const strategies = {
     const score = (c) => (c.effect?.[stat] ?? 0) + (c.success?.effect?.[stat] ?? 0) * (c.chance ?? 0);
     return cs.reduce((a, b) => (score(b) > score(a) ? b : a)).index;
   },
+  // reckless: the choice whose expected effects move stats the most in total (sum of |delta|),
+  // ignoring direction. Good at finding extreme endings a careful player never reaches.
+  reckless: (g) => {
+    const cs = g.choices();
+    const sum = (eff, w = 1) => Object.values(eff ?? {}).reduce((t, v) => t + Math.abs(v) * w, 0);
+    const score = (c) => sum(c.effect) + sum(c.success?.effect, c.chance ?? 0) + sum(c.failure?.effect, c.chance === undefined ? 0 : 1 - c.chance);
+    return cs.reduce((a, b) => (score(b) > score(a) ? b : a)).index;
+  },
 };
 
 export function playRun(pack, pick, seed) {

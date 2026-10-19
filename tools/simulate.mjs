@@ -22,7 +22,7 @@ export function simulate(pack, pick, n, seed0 = 1) {
   return r;
 }
 
-const bots = { random: strategies.random, first: strategies.first, ...Object.fromEntries(Object.keys(pack.stats).map((k) => ['max-' + k, strategies.greedy(k)])) };
+const bots = { random: strategies.random, first: strategies.first, reckless: strategies.reckless, ...Object.fromEntries(Object.keys(pack.stats).map((k) => ['max-' + k, strategies.greedy(k)])) };
 const report = {};
 for (const [bot, pick] of Object.entries(bots)) {
   const r = (report[bot] = simulate(pack, pick, N, seed0));

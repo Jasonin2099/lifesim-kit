@@ -68,3 +68,15 @@ test('every sample-pack event is seen by some bot', () => {
   const never = pack.events.map((e) => e.id).filter((id) => !seen.has(id));
   assert.deepEqual(never, []);
 });
+
+test('reckless bot picks the choice with the biggest total delta', () => {
+  const p = structuredClone(pack);
+  p.events[0].choices = [
+    { text: 'calm', effect: { energy: 1 } },
+    { text: 'wild', effect: { energy: -20, money: 15 } },
+    { text: 'gamble', chance: 0.5, success: { effect: { money: 30 } }, failure: { effect: { energy: -2 } } },
+  ];
+  const g = createGame(p, { seed: 1 });
+  assert.equal(strategies.reckless(g), 1);
+  assert.ok(playRun(pack, strategies.reckless, 3).state.ending);
+});
