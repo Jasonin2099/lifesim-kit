@@ -70,7 +70,14 @@
       "text": { "zh": "嗓子从早上开始就不太对。", "en": "Your throat has felt off since this morning." },
       "choices": [
         { "label": { "zh": "请假休息", "en": "Take a sick day" }, "effect": { "energy": 20, "mood": -2 }, "result": { "zh": "睡了一整天。", "en": "You sleep the whole day." } },
-        { "label": { "zh": "硬撑", "en": "Push through" }, "effect": { "energy": -10, "skill": 2 }, "result": { "zh": "那一周的代码你后来都重写了。", "en": "You rewrote that week's code later." } }
+        { "label": { "zh": "硬撑", "en": "Push through" }, "effect": { "energy": -15, "skill": 3, "mood": -6 }, "result": { "zh": "那一周的代码你后来都重写了。", "en": "You rewrote that week's code later." } }
+      ] },
+    { "id": "crunch", "turns": [2, 6], "when": { "stat": "energy", "max": 70 }, "weight": 2,
+      "title": { "zh": "上线前一周", "en": "Launch week" },
+      "text": { "zh": "上线日期提前了，群里开始有人发「今晚通宵吗」。", "en": "Launch got pulled in. Someone in the chat asks \"all-nighter?\"" },
+      "choices": [
+        { "label": { "zh": "通宵", "en": "Pull the all-nighter" }, "effect": { "energy": -40, "skill": 5, "money": 150 }, "result": { "zh": "天亮的时候，部署成功了。你不太记得过程。", "en": "It ships at dawn. You don't remember most of it." } },
+        { "label": { "zh": "按时下班", "en": "Leave on time" }, "effect": { "mood": -2 }, "result": { "zh": "第二天大家都很困，只有你醒着。", "en": "Next day everyone's a zombie except you." } }
       ] },
     { "id": "rent", "fixed": 4,
       "title": { "zh": "房租涨了", "en": "Rent goes up" },

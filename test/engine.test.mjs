@@ -80,3 +80,13 @@ test('reckless bot picks the choice with the biggest total delta', () => {
   assert.equal(strategies.reckless(g), 1);
   assert.ok(playRun(pack, strategies.reckless, 3).state.ending);
 });
+
+test('reckless bot can burn out, a random player almost never does', () => {
+  const rate = (pick) => {
+    let n = 0;
+    for (let i = 0; i < 1000; i++) if (playRun(pack, pick, 1 + i * 7919).state.ending === 'burned_out') n++;
+    return n;
+  };
+  assert.ok(rate(strategies.reckless) > 0, 'burned_out should be reachable by the reckless bot');
+  assert.ok(rate(strategies.random) < 50, 'burned_out should stay rare for a random player');
+});
