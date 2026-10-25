@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createGame, loadGame, validatePack } from '../engine/game.js';
 import { check } from '../engine/conditions.js';
-import { playRun, strategies } from '../engine/autoplay.js';
+import { playRun, strategies, botsFor } from '../engine/autoplay.js';
 
 const pack = JSON.parse(readFileSync(new URL('../packs/first-job/pack.json', import.meta.url)));
 
@@ -89,4 +89,12 @@ test('reckless bot can burn out, a random player almost never does', () => {
   };
   assert.ok(rate(strategies.reckless) > 0, 'burned_out should be reachable by the reckless bot');
   assert.ok(rate(strategies.random) < 50, 'burned_out should stay rare for a random player');
+});
+
+test('botsFor lists every bot, or just the one asked for', () => {
+  const all = botsFor(pack);
+  assert.ok(all.random && all.first && all.reckless);
+  for (const k of Object.keys(pack.stats)) assert.ok(all['max-' + k]);
+  assert.deepEqual(Object.keys(botsFor(pack, 'reckless')), ['reckless']);
+  assert.throws(() => botsFor(pack, 'nope'), /unknown bot/);
 });

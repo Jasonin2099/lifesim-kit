@@ -27,3 +27,11 @@ export function playRun(pack, pick, seed) {
   while (!g.state.ended && guard--) g.choose(pick(g));
   return g;
 }
+
+// All built-in bots for a pack, optionally narrowed to one name (e.g. 'reckless', 'max-money').
+export function botsFor(pack, only) {
+  const all = { random: strategies.random, first: strategies.first, reckless: strategies.reckless, ...Object.fromEntries(Object.keys(pack.stats).map((k) => ['max-' + k, strategies.greedy(k)])) };
+  if (only == null) return all;
+  if (!all[only]) throw new Error(`unknown bot "${only}", try one of: ${Object.keys(all).join(', ')}`);
+  return { [only]: all[only] };
+}

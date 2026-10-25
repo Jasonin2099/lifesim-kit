@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Batch-play a pack with bots and print ending rates, final stats and event coverage.
-//   node tools/simulate.mjs [packs/first-job/pack.json] [--n 1000] [--seed 1] [--json out.json]
+//   node tools/simulate.mjs [packs/first-job/pack.json] [--n 1000] [--seed 1] [--json out.json] [--bot reckless]
 import { readFileSync, writeFileSync } from 'node:fs';
-import { playRun, strategies } from '../engine/autoplay.js';
+import { playRun, botsFor } from '../engine/autoplay.js';
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
@@ -22,7 +22,8 @@ export function simulate(pack, pick, n, seed0 = 1) {
   return r;
 }
 
-const bots = { random: strategies.random, first: strategies.first, reckless: strategies.reckless, ...Object.fromEntries(Object.keys(pack.stats).map((k) => ['max-' + k, strategies.greedy(k)])) };
+let bots;
+try { bots = botsFor(pack, opt('bot')); } catch (e) { console.error(e.message); process.exit(1); }
 const report = {};
 for (const [bot, pick] of Object.entries(bots)) {
   const r = (report[bot] = simulate(pack, pick, N, seed0));

@@ -6,7 +6,7 @@ Small steps, roughly one per day.
 - [x] Sample pack: make `cold` and `burnout` reachable (the simulator says nobody sees them)
 - [x] Sample pack: make the `burned_out` ending reachable by a reckless bot
 - [x] Simulator: add a `reckless` bot (always the choice with the biggest total delta)
-- [ ] Simulator: `--bot` flag to run only one bot
+- [x] Simulator: `--bot` flag to run only one bot
 - [ ] Simulator: per-turn stat curve (median per turn) in the JSON report
 - [ ] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
 - [ ] Engine: text templates — `{stat:money}` inside event text
