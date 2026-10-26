@@ -32,6 +32,7 @@
 npm test                 # 引擎测试
 npm run simulate         # 批量模拟示例剧本
 npm run simulate -- --bot reckless   # 只跑一个机器人
+npm run simulate -- --curve          # 再打印每回合开始时的数值中位数（--json 里也有 curve）
 npm run serve            # 打开 http://localhost:8000
 ```
 
