@@ -110,3 +110,20 @@ export function validatePack(pack) {
   if (errs.length) throw new Error('invalid pack:\n  ' + errs.join('\n  '));
   return true;
 }
+
+/** Non-fatal problems: things that load fine but probably aren't what the author meant. */
+export function packWarnings(pack) {
+  const warns = [];
+  const T = pack.turns;
+  for (const e of pack.events ?? []) {
+    if (e.turns) {
+      const [lo, hi = lo] = e.turns;
+      if (lo > hi) warns.push(`${e.id}: turns [${lo}, ${hi}] is reversed, the event can never appear`);
+      else if (hi < 1 || lo > T) warns.push(`${e.id}: turns [${lo}, ${hi}] is outside 1..${T}, the event can never appear`);
+      else if (lo < 1 || hi > T) warns.push(`${e.id}: turns [${lo}, ${hi}] goes past 1..${T}`);
+    }
+    if (e.fixed !== undefined && e.fixed !== false && !(e.fixed >= 1 && e.fixed <= T))
+      warns.push(`${e.id}: fixed turn ${e.fixed} is outside 1..${T}, the event can never appear`);
+  }
+  return warns;
+}

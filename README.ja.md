@@ -15,7 +15,7 @@
   - 共通の条件記法：`{stat, min, max}` `{flag}` `{turn}` `{seen}` `{all|any|not}`
   - 成功率つきの選択肢（`chance` + `success` / `failure`）、幅のある効果（`[lo, hi]`）
   - シード付き乱数。状態はセーブに入るので、ロード後も同じ乱数列が続きます
-  - `validatePack()` が数値名のタイプミス・ID 重複・フォールバックエンディング漏れを検出
+  - `validatePack()` が数値名のタイプミス・ID 重複・フォールバックエンディング漏れを検出。`packWarnings()` は `turns` / `fixed` が総ターン数の範囲外で出現しないイベントを警告（シミュレーターが最初に表示）
 - `tools/simulate.mjs`：ボットに千回ずつ遊ばせて、エンディング分布・数値の中央値・一度も出なかったイベントを表示
 - `packs/first-job/`：サンプルシナリオ
 - `index.html` + `demo/`：そのまま GitHub Pages に置ける遊べるページ

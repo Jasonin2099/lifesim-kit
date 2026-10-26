@@ -3,6 +3,7 @@
 //   node tools/simulate.mjs [packs/first-job/pack.json] [--n 1000] [--seed 1] [--json out.json] [--bot reckless]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { playRun, botsFor } from '../engine/autoplay.js';
+import { packWarnings } from '../engine/game.js';
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
@@ -10,6 +11,7 @@ const file = args.find((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith
 const pack = JSON.parse(readFileSync(file, 'utf8'));
 const N = Number(opt('n', 1000)), seed0 = Number(opt('seed', 1));
 const name = (x) => (typeof x === 'object' ? x.en ?? Object.values(x)[0] : x);
+for (const w of packWarnings(pack)) console.warn('warning: ' + w);
 
 export function simulate(pack, pick, n, seed0 = 1) {
   const r = { runs: n, endings: {}, stats: {}, seen: {} };

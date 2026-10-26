@@ -11,7 +11,7 @@ Small steps, roughly one per day.
 - [ ] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
 - [ ] Engine: text templates — `{stat:money}` inside event text
 - [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
-- [ ] Validator: warn on events whose `turns` range is outside `1..turns`
+- [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [ ] Validator: warn on flags that are checked but never set (and vice versa)
 - [ ] Demo: keyboard shortcuts (1/2/3 to choose)
 - [ ] Demo: run log / timeline on the ending screen

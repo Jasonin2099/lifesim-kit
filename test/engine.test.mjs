@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createGame, loadGame, validatePack } from '../engine/game.js';
+import { createGame, loadGame, validatePack, packWarnings } from '../engine/game.js';
 import { check } from '../engine/conditions.js';
 import { playRun, strategies, botsFor } from '../engine/autoplay.js';
 
@@ -51,6 +51,23 @@ test('validator catches mistakes', () => {
   bad.events[0].choices[0].effect.hapiness = 1;
   bad.endings = bad.endings.filter((e) => e.when);
   assert.throws(() => validatePack(bad), /unknown stat "hapiness"[\s\S]*fallback ending/);
+});
+
+test('warnings for turn ranges outside the pack', () => {
+  assert.deepEqual(packWarnings(pack), []);
+  const p = structuredClone(pack);
+  const T = p.turns;
+  p.events[0].turns = [T + 1, T + 3];
+  p.events[1].turns = [0, 2];
+  p.events[2].turns = [3, 2];
+  p.events[3].fixed = T + 1;
+  const w = packWarnings(p);
+  assert.equal(w.length, 4);
+  assert.match(w[0], /outside 1\.\.\d+, the event can never appear/);
+  assert.match(w[1], /goes past/);
+  assert.match(w[2], /reversed/);
+  assert.match(w[3], /fixed turn/);
+  assert.ok(validatePack(p)); // warnings only, still loads
 });
 
 test('unavailable choice is rejected', () => {
