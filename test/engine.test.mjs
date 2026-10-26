@@ -124,3 +124,12 @@ test('text placeholders', async () => {
   assert.equal(fill('{stat:bogus} {flag:x} {other}', s, pack), '{stat:bogus} {flag:x} {other}');
   assert.equal(fill(undefined, s, pack), undefined);
 });
+
+test('warnings for flags checked but never set, and set but never checked', () => {
+  const p = structuredClone(pack);
+  p.endings.unshift({ id: 'ghost', when: { not: { flag: 'typo_flag' } }, title: 'x', text: 'x' });
+  p.events[0].choices[1].effect.flag = 'lonely';
+  const w = packWarnings(p);
+  assert.ok(w.includes('flag "typo_flag" is checked but never set'), w.join('\n'));
+  assert.ok(w.includes('flag "lonely" is set but never checked'), w.join('\n'));
+});

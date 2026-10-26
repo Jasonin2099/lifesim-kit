@@ -12,7 +12,7 @@ Small steps, roughly one per day.
 - [x] Engine: text templates — `{stat:money}`, `{turn}`, `{flag:x?yes|no}` inside event text
 - [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
-- [ ] Validator: warn on flags that are checked but never set (and vice versa)
+- [x] Validator: warn on flags that are checked but never set (and vice versa)
 - [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
 - [ ] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack

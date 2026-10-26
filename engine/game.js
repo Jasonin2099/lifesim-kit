@@ -125,5 +125,27 @@ export function packWarnings(pack) {
     if (e.fixed !== undefined && e.fixed !== false && !(e.fixed >= 1 && e.fixed <= T))
       warns.push(`${e.id}: fixed turn ${e.fixed} is outside 1..${T}, the event can never appear`);
   }
+  const { checked, set } = flagUse(pack);
+  for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
+  for (const f of set) if (!checked.has(f)) warns.push(`flag "${f}" is set but never checked`);
   return warns;
+}
+
+// Which flags conditions look at, and which effects set (unflag alone never makes a flag true).
+function flagUse(pack) {
+  const checked = new Set(), set = new Set();
+  const walk = (c) => {
+    if (!c || typeof c !== 'object') return;
+    if (Array.isArray(c)) return c.forEach(walk);
+    if (c.flag) checked.add(c.flag);
+    [c.all, c.any, c.not].forEach(walk);
+  };
+  const eff = (e) => { for (const f of [].concat(e?.flag ?? [])) set.add(f); };
+  eff(pack.perTurnEffect);
+  for (const e of pack.events ?? []) {
+    walk(e.when);
+    for (const c of e.choices ?? []) { walk(c.when); eff(c.effect); eff(c.success?.effect); eff(c.failure?.effect); }
+  }
+  for (const e of pack.endings ?? []) walk(e.when);
+  return { checked, set };
 }
