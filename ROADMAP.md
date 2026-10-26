@@ -16,5 +16,5 @@ Small steps, roughly one per day.
 - [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
 - [ ] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack
-- [ ] Docs: `docs/pack-format.md` with every field
+- [x] Docs: `docs/pack-format.md` with every field
 - [ ] Second tiny sample pack to prove packs are swappable (`?pack=` URL param)

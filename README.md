@@ -53,6 +53,8 @@ unreached endings: burned_out
 
 ## 写自己的剧本
 
+每个字段的含义和默认值见 [docs/pack-format.md](docs/pack-format.md)（英文）。
+
 ```json
 {
   "id": "my-pack", "turns": 6, "perTurn": 2,

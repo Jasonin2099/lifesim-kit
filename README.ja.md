@@ -29,6 +29,6 @@ npm run simulate -- --curve   # ターンごとの数値の中央値も表示
 npm run serve     # http://localhost:8000
 ```
 
-JSON の書き方は[中国語版 README](README.md#写自己的剧本) の例を見てください（キーは共通）。
+JSON の書き方は[中国語版 README](README.md#写自己的剧本) の例を、全フィールドの説明は [docs/pack-format.md](docs/pack-format.md)（英語）を見てください。
 
 ロードマップ：[ROADMAP.md](ROADMAP.md) ・ MIT License
