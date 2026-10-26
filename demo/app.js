@@ -40,9 +40,16 @@ function render() {
     return;
   }
   const e = game.current();
-  app.innerHTML = head + res + `<div class="card"><h2>${esc(F(e.title))}</h2><p>${esc(F(e.text))}</p>${game.choices().map((c) => `<button class="choice" data-i="${c.index}">${esc(F(c.label))}</button>`).join('')}</div>`;
+  app.innerHTML = head + res + `<div class="card"><h2>${esc(F(e.title))}</h2><p>${esc(F(e.text))}</p>${game.choices().map((c, n) => `<button class="choice" data-i="${c.index}"><kbd>${n + 1}</kbd> ${esc(F(c.label))}</button>`).join('')}</div>`;
   app.querySelectorAll('button.choice').forEach((b) => (b.onclick = () => { last = game.choose(+b.dataset.i); render(); }));
 }
+// 1–9 picks the n-th visible choice; Enter presses the main button (start / play again)
+document.addEventListener('keydown', (ev) => {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey || ev.target.closest?.('input, textarea')) return;
+  const n = Number(ev.key);
+  const btn = n >= 1 && n <= 9 ? app.querySelectorAll('button.choice[data-i]')[n - 1] : ev.key === 'Enter' && ev.target === document.body ? app.querySelector('button.primary') : null;
+  if (btn) { ev.preventDefault(); btn.click(); }
+});
 const lb = document.getElementById('lang');
 const setLang = () => { document.documentElement.lang = lang; lb.textContent = lang === 'zh' ? 'EN' : '中文'; };
 lb.onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; localStorage.setItem('lifesim-kit:lang', lang); setLang(); game ? render() : title(); };

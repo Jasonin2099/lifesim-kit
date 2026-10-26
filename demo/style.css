@@ -9,6 +9,8 @@ h1{font-size:22px;margin:8px 0}h2{font-size:18px;margin:0 0 6px}.muted{color:var
 .bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
 button.choice{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;font:inherit;cursor:pointer}
 button.choice:hover,button.choice:focus-visible{border-color:var(--accent);outline:none}
+kbd{display:inline-block;min-width:1.4em;margin-right:6px;padding:0 4px;border:1px solid var(--line);border-radius:4px;font:12px/1.5 ui-monospace,monospace;text-align:center;color:var(--muted)}
+@media (hover:none){kbd{display:none}}
 .result{border-left:3px solid var(--accent);padding-left:10px}.delta{font-size:13px;color:var(--muted)}
 .primary{padding:10px 18px;border-radius:10px;border:0;background:var(--accent);color:#fff;font:inherit;cursor:pointer}
 footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:10px;font-size:13px;color:var(--muted);background:var(--bg)}

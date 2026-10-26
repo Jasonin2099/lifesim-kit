@@ -13,7 +13,7 @@ Small steps, roughly one per day.
 - [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [ ] Validator: warn on flags that are checked but never set (and vice versa)
-- [ ] Demo: keyboard shortcuts (1/2/3 to choose)
+- [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
 - [ ] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack
 - [ ] Docs: `docs/pack-format.md` with every field
