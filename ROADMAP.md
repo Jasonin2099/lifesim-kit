@@ -9,7 +9,7 @@ Small steps, roughly one per day.
 - [x] Simulator: `--bot` flag to run only one bot
 - [ ] Simulator: per-turn stat curve (median per turn) in the JSON report
 - [ ] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
-- [ ] Engine: text templates — `{stat:money}` inside event text
+- [x] Engine: text templates — `{stat:money}`, `{turn}`, `{flag:x?yes|no}` inside event text
 - [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [ ] Validator: warn on flags that are checked but never set (and vice versa)

@@ -115,3 +115,12 @@ test('botsFor lists every bot, or just the one asked for', () => {
   assert.deepEqual(Object.keys(botsFor(pack, 'reckless')), ['reckless']);
   assert.throws(() => botsFor(pack, 'nope'), /unknown bot/);
 });
+
+test('text placeholders', async () => {
+  const { fill } = await import('../engine/text.js');
+  const s = { turn: 2, stats: { money: 340 }, flags: { promoted: true } };
+  assert.equal(fill('Savings {stat:money}, month {turn}/{turns}', s, pack), `Savings 340, month 2/${pack.turns}`);
+  assert.equal(fill('{flag:promoted?yes|no} {flag:fired?yes|no}', s, pack), 'yes no');
+  assert.equal(fill('{stat:bogus} {flag:x} {other}', s, pack), '{stat:bogus} {flag:x} {other}');
+  assert.equal(fill(undefined, s, pack), undefined);
+});

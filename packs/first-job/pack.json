@@ -81,7 +81,7 @@
       ] },
     { "id": "rent", "fixed": 4,
       "title": { "zh": "房租涨了", "en": "Rent goes up" },
-      "text": { "zh": "房东发来消息：下个月起每月多两百。", "en": "Landlord texts: +200 a month from next month." },
+      "text": { "zh": "房东发来消息：下个月起每月多两百。你看了眼存款：{stat:money}。", "en": "Landlord texts: +200 a month from next month. You check your savings: {stat:money}." },
       "choices": [
         { "label": { "zh": "认了", "en": "Accept" }, "effect": { "money": -200, "mood": -3 }, "result": { "zh": "好吧。", "en": "Fine." } },
         { "label": { "zh": "去谈谈", "en": "Negotiate" }, "chance": 0.4,
