@@ -17,4 +17,4 @@ Small steps, roughly one per day.
 - [x] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack
 - [x] Docs: `docs/pack-format.md` with every field
-- [ ] Second tiny sample pack to prove packs are swappable (`?pack=` URL param)
+- [x] Second tiny sample pack to prove packs are swappable (`?pack=` URL param)

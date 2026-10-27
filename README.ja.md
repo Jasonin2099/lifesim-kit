@@ -18,8 +18,8 @@
   - シード付き乱数。状態はセーブに入るので、ロード後も同じ乱数列が続きます
   - `validatePack()` が数値名のタイプミス・ID 重複・フォールバックエンディング漏れを検出。`packWarnings()` は `turns` / `fixed` が総ターン数の範囲外で出現しないイベントを警告（シミュレーターが最初に表示）
 - `tools/simulate.mjs`：ボットに千回ずつ遊ばせて、エンディング分布・数値の中央値・一度も出なかったイベントを表示
-- `packs/first-job/`：サンプルシナリオ
-- `index.html` + `demo/`：そのまま GitHub Pages に置ける遊べるページ
+- `packs/first-job/`（『入社半年』）と `packs/night-market/`（『夜市の五晩』）：サンプルシナリオ 2 本（中国語／英語）。シナリオを差し替えられることの確認用
+- `index.html` + `demo/`：そのまま GitHub Pages に置ける遊べるページ。`?pack=night-market` でシナリオを切り替え（[遊ぶ](https://jasonin2099.github.io/lifesim-kit/?pack=night-market)）、タイトル画面にも切り替えリンクあり
 
 ## 動かす
 

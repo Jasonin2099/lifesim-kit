@@ -1,0 +1,87 @@
+{
+  "id": "night-market",
+  "title": { "zh": "夜市五晚", "en": "Five Nights at the Market" },
+  "intro": { "zh": "你在夜市租了一个摊位，只租五个晚上。卖烤饭团。", "en": "You rented a night-market stall for five nights. You sell grilled rice balls." },
+  "turns": 5,
+  "perTurn": 2,
+  "turnLabel": { "zh": "第 {n} 晚", "en": "Night {n}" },
+  "perTurnEffect": { "stock": 8, "money": -50, "energy": 5 },
+  "stats": {
+    "stock":  { "label": { "zh": "库存", "en": "Stock" },  "initial": 20, "min": 0, "max": 60 },
+    "energy": { "label": { "zh": "体力", "en": "Energy" }, "initial": 45, "min": 0, "max": 100 },
+    "fame":   { "label": { "zh": "口碑", "en": "Word of mouth" }, "initial": 0, "min": 0, "max": 100 },
+    "money":  { "label": { "zh": "钱", "en": "Cash" }, "initial": 300, "min": 0, "max": 99999 }
+  },
+  "events": [
+    { "id": "setup", "fixed": 1,
+      "title": { "zh": "支摊", "en": "Setting up" },
+      "text": { "zh": "隔壁卖章鱼烧的大叔看你半天搭不好棚子。", "en": "The takoyaki guy next door watches you fail to put up the awning." },
+      "choices": [
+        { "label": { "zh": "请他帮忙", "en": "Ask for help" }, "effect": { "flag": "neighbor" }, "result": { "zh": "他三下搭好，还送你一句「别放太多酱油」。", "en": "Done in a minute, plus a tip: \"go easy on the soy sauce\"." } },
+        { "label": { "zh": "自己弄", "en": "Figure it out" }, "effect": { "energy": -10 }, "result": { "zh": "开张晚了二十分钟。", "en": "You open twenty minutes late." } }
+      ] },
+    { "id": "rush", "once": false, "cooldown": 1, "weight": 3,
+      "title": { "zh": "排队了", "en": "A queue" },
+      "text": { "zh": "摊前突然排起了队。库存还剩 {stat:stock} 个。", "en": "Suddenly there's a queue. {stat:stock} left in stock." },
+      "choices": [
+        { "label": { "zh": "全力开烤", "en": "Grill flat out" }, "when": { "stat": "stock", "min": 10 }, "effect": { "stock": -10, "money": 200, "energy": -20, "fame": 5 }, "result": { "zh": "手腕酸了，钱盒满了。", "en": "Sore wrists, full cash box." } },
+        { "label": { "zh": "慢慢来", "en": "Take it easy" }, "when": { "stat": "stock", "min": 4 }, "effect": { "stock": -4, "money": 80, "energy": -5 }, "result": { "zh": "后面几个人等不及走了。", "en": "A few people at the back give up." } },
+        { "label": { "zh": "挂「售罄」", "en": "Hang the sold-out sign" }, "effect": { "fame": -2 }, "result": { "zh": "有人说「明天再来」。", "en": "Someone says they'll come back tomorrow." } }
+      ] },
+    { "id": "rain", "turns": [2, 5],
+      "title": { "zh": "下雨", "en": "Rain" },
+      "text": { "zh": "九点开始下雨，人一下子少了。", "en": "It starts raining at nine. The crowd thins out." },
+      "choices": [
+        { "label": { "zh": "早点收摊", "en": "Pack up early" }, "effect": { "energy": 10 }, "result": { "zh": "回家泡了个澡。", "en": "You go home and take a bath." } },
+        { "label": { "zh": "撑伞硬守", "en": "Stay under the awning" }, "chance": 0.5,
+          "success": { "effect": { "money": 120, "stock": -6, "fame": 4 }, "result": { "zh": "躲雨的人顺手买了几个。", "en": "People sheltering from the rain buy a few." } },
+          "failure": { "effect": { "energy": -10 }, "result": { "zh": "一个客人都没有，鞋湿透了。", "en": "Not one customer, and your shoes are soaked." } } }
+      ] },
+    { "id": "influencer", "turns": [2, 4], "when": { "stat": "fame", "min": 5 },
+      "title": { "zh": "有人在拍", "en": "Someone's filming" },
+      "text": { "zh": "一个举着手机的人问能不能拍你烤饭团。", "en": "Someone with a phone asks if they can film you grilling." },
+      "choices": [
+        { "label": { "zh": "表演一下翻面", "en": "Show off the flip" }, "chance": 0.6,
+          "success": { "effect": { "fame": 15, "flag": "viral" }, "result": { "zh": "第二天来了好几个说「看了视频」的人。", "en": "Next night, several people say they saw the video." } },
+          "failure": { "effect": { "fame": -3, "stock": -2 }, "result": { "zh": "饭团掉地上了。视频很真实。", "en": "The rice ball hits the ground. Very authentic footage." } } },
+        { "label": { "zh": "婉拒", "en": "Politely decline" }, "result": { "zh": "对方去拍隔壁章鱼烧了。", "en": "They go film the takoyaki instead." } }
+      ] },
+    { "id": "neighbor_sauce", "turns": [3, 5], "when": { "flag": "neighbor" },
+      "title": { "zh": "大叔的酱", "en": "The neighbor's sauce" },
+      "text": { "zh": "章鱼烧大叔递来一小罐自家调的酱。", "en": "The takoyaki guy hands you a small jar of his own sauce." },
+      "choices": [
+        { "label": { "zh": "收下，刷在饭团上", "en": "Brush it on" }, "effect": { "fame": 8, "flag": "secret_sauce" }, "result": { "zh": "香味飘出去半条街。", "en": "The smell carries half a street." } },
+        { "label": { "zh": "请他吃一个饭团", "en": "Trade him a rice ball" }, "effect": { "stock": -1, "fame": 3 }, "result": { "zh": "他说「还行」，其实吃了两个。", "en": "He says \"not bad\" and eats two." } }
+      ] },
+    { "id": "restock", "once": false, "cooldown": 1, "when": { "stat": "stock", "max": 15 },
+      "title": { "zh": "米快没了", "en": "Running low" },
+      "text": { "zh": "只剩 {stat:stock} 个的量了。超市还开着。", "en": "Only enough for {stat:stock} more. The supermarket is still open." },
+      "choices": [
+        { "label": { "zh": "跑一趟补货", "en": "Run for supplies" }, "when": { "stat": "money", "min": 100 }, "effect": { "money": -100, "stock": 20, "energy": -8 }, "result": { "zh": "扛回两袋米。", "en": "You haul back two bags of rice." } },
+        { "label": { "zh": "卖完就收", "en": "Sell out and close" }, "result": { "zh": "今晚就到这里。", "en": "That's it for tonight." } }
+      ] },
+    { "id": "break", "once": false, "cooldown": 2,
+      "title": { "zh": "空档", "en": "A lull" },
+      "text": { "zh": "九点半，人流断了一会儿。", "en": "9:30. The crowd drops off for a while." },
+      "choices": [
+        { "label": { "zh": "坐下歇会儿", "en": "Sit down" }, "effect": { "energy": 12 }, "result": { "zh": "喝了半瓶麦茶。", "en": "Half a bottle of barley tea." } },
+        { "label": { "zh": "去别的摊逛逛", "en": "Check out other stalls" }, "effect": { "money": -30, "fame": 2, "energy": -2 }, "result": { "zh": "顺便发了一圈传单。", "en": "You hand out a few flyers on the way." } }
+      ] }
+  ],
+  "endings": [
+    { "id": "collapsed", "immediate": true, "when": { "stat": "energy", "max": 0 },
+      "title": { "zh": "累倒了", "en": "Out cold" },
+      "text": { "zh": "最后两晚摊位空着。下次找个帮手。", "en": "The stall sits empty for the last nights. Next time, bring a helper." } },
+    { "id": "famous", "when": [{ "flag": "viral" }, { "stat": "fame", "min": 30 }],
+      "title": { "zh": "夜市名摊", "en": "Market legend" },
+      "text": { "zh": "管理处问你下个月还来不来，摊位费打八折。", "en": "The organizers ask you back next month, with a discount on the stall fee." } },
+    { "id": "profit", "when": { "stat": "money", "min": 700 },
+      "title": { "zh": "赚到了", "en": "In the black" },
+      "text": { "zh": "数了三遍，真的赚了 {stat:money}。", "en": "You count it three times. {stat:money}, for real." } },
+    { "id": "sauce", "when": { "flag": "secret_sauce" },
+      "title": { "zh": "两家合作", "en": "Partnership" },
+      "text": { "zh": "你和章鱼烧大叔商量明年合租一个大摊位。", "en": "You and the takoyaki guy plan to share a big stall next year." } },
+    { "id": "even", "title": { "zh": "就当体验", "en": "Call it experience" },
+      "text": { "zh": "钱没赚多少，但你知道怎么搭棚子了。", "en": "Not much money, but you can put up an awning now." } }
+  ]
+}

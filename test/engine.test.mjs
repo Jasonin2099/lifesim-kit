@@ -168,3 +168,32 @@ test('cooldown is validated and warned about', () => {
   assert.ok(w.some((x) => /lunch: cooldown has no effect unless once is false/.test(x)), w.join('\n'));
   assert.ok(w.some((x) => /day_one: cooldown has no effect on a fixed event/.test(x)), w.join('\n'));
 });
+
+// every pack under packs/ must load, end every run, and be listed in the demo's ?pack= list
+import { readdirSync } from 'node:fs';
+const packDirs = readdirSync(new URL('../packs/', import.meta.url), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+const loadPack = (id) => JSON.parse(readFileSync(new URL(`../packs/${id}/pack.json`, import.meta.url)));
+
+test('there is more than one sample pack', () => assert.ok(packDirs.length >= 2));
+
+for (const id of packDirs) {
+  test(`pack ${id}: valid, id matches folder, no warnings, every run ends`, () => {
+    const p = loadPack(id);
+    assert.ok(validatePack(p));
+    assert.equal(p.id, id);
+    assert.deepEqual(packWarnings(p), []);
+    for (let i = 0; i < 200; i++) assert.ok(playRun(p, strategies.random, i).state.ending);
+  });
+}
+
+test('demo ?pack= list matches the packs folder', () => {
+  const src = readFileSync(new URL('../demo/app.js', import.meta.url), 'utf8');
+  const list = JSON.parse(src.match(/const PACKS = (\[[^\]]*\])/)[1].replace(/'/g, '"'));
+  assert.deepEqual([...list].sort(), [...packDirs].sort());
+});
+
+test('a save from one pack does not load into another', () => {
+  const g = createGame(loadPack('night-market'), { seed: 3 });
+  g.choose(0);
+  assert.throws(() => loadGame(pack, g.save()));
+});

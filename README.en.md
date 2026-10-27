@@ -18,8 +18,8 @@ A tiny engine for text-based life-sim games. The story lives in JSON; the engine
   - seeded RNG stored in the save, so a loaded game continues the same random sequence
   - `validatePack()` catches misspelled stats, duplicate ids, a missing fallback ending; `packWarnings()` flags events whose `turns` / `fixed` fall outside the pack's turn count (the simulator prints these first)
 - `tools/simulate.mjs` — bots play a thousand runs each; prints ending rates, median stats, and events/endings nobody ever reached
-- `packs/first-job/` — sample pack (Chinese + English)
-- `index.html` + `demo/` — playable page, ready for GitHub Pages
+- `packs/first-job/` (*Six Months In*) and `packs/night-market/` (*Five Nights at the Market*) — two sample packs (Chinese + English), to show packs are swappable
+- `index.html` + `demo/` — playable page, ready for GitHub Pages; pick a pack with `?pack=night-market` ([play it](https://jasonin2099.github.io/lifesim-kit/?pack=night-market)) or the link on the title screen
 
 ## Run
 

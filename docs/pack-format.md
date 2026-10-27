@@ -1,6 +1,7 @@
 # Pack format
 
-A pack is one JSON file. The engine only reads numbers, ids and conditions; text is
+A pack is one JSON file, by convention `packs/<id>/pack.json` (the demo loads it with
+`?pack=<id>` once the id is added to `PACKS` in `demo/app.js`; a test checks the two match). The engine only reads numbers, ids and conditions; text is
 for the UI. Any text field can be a plain string or `{ "zh": "…", "en": "…" }`, and
 can contain [placeholders](#text-placeholders).
 

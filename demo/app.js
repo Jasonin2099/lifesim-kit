@@ -1,13 +1,18 @@
 import { createGame, loadGame } from '../engine/game.js';
 import { fill } from '../engine/text.js';
 
-const pack = await (await fetch('packs/first-job/pack.json')).json();
+// packs the demo can load; ?pack=<id> picks one (unknown ids fall back to the first)
+const PACKS = ['first-job', 'night-market'];
+const want = new URLSearchParams(location.search).get('pack');
+const packId = PACKS.includes(want) ? want : PACKS[0];
+const all = await Promise.all(PACKS.map(async (id) => (await fetch(`packs/${id}/pack.json`)).json()));
+const pack = all[PACKS.indexOf(packId)];
 const KEY = 'lifesim-kit:' + pack.id;
 let lang = localStorage.getItem('lifesim-kit:lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
 const T = (x) => (x && typeof x === 'object' ? x[lang] ?? x.en ?? Object.values(x)[0] : x ?? '');
 // pack text with {stat:…}/{turn}/{flag:…?a|b} filled in from the current run
 const F = (x) => (game ? fill(T(x), game.state, pack) : T(x));
-const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run' } };
+const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局', other: '换个剧本' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run', other: 'Other packs' } };
 const u = (k) => UI[lang][k];
 const app = document.getElementById('app');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -32,7 +37,8 @@ function timeline() {
 function title() {
   const saved = localStorage.getItem(KEY);
   app.innerHTML = `<h1>${esc(T(pack.title))}</h1><p>${esc(T(pack.intro))}</p>
-    <button class="primary" id="go">${u('start')}</button> ${saved ? `<button class="choice" id="resume" style="display:inline-block;width:auto">${u('cont')}</button>` : ''}`;
+    <button class="primary" id="go">${u('start')}</button> ${saved ? `<button class="choice" id="resume" style="display:inline-block;width:auto">${u('cont')}</button>` : ''}
+    <p class="muted">${u('other')}: ${all.filter((p) => p.id !== pack.id).map((p) => `<a href="?pack=${encodeURIComponent(p.id)}">${esc(T(p.title))}</a>`).join(' · ')}</p>`;
   document.getElementById('go').onclick = () => { game = createGame(pack); last = null; render(); };
   const r = document.getElementById('resume');
   if (r) r.onclick = () => { try { game = loadGame(pack, saved); render(); } catch { localStorage.removeItem(KEY); title(); } };
