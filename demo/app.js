@@ -7,7 +7,7 @@ let lang = localStorage.getItem('lifesim-kit:lang') || (navigator.language.start
 const T = (x) => (x && typeof x === 'object' ? x[lang] ?? x.en ?? Object.values(x)[0] : x ?? '');
 // pack text with {stat:…}/{turn}/{flag:…?a|b} filled in from the current run
 const F = (x) => (game ? fill(T(x), game.state, pack) : T(x));
-const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume' } };
+const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run' } };
 const u = (k) => UI[lang][k];
 const app = document.getElementById('app');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -18,6 +18,16 @@ function stats() {
     const v = game.state.stats[k], w = d.max < 1000 ? (100 * v) / d.max : null;
     return `<div class="stat">${esc(T(d.label))}<b>${v}</b>${w !== null ? `<div class="bar"><i style="width:${w}%"></i></div>` : ''}</div>`;
   }).join('')}</div>`;
+}
+// the run as a list: month, event, what you picked and what changed
+function timeline() {
+  const byId = new Map(pack.events.map((e) => [e.id, e]));
+  const rows = game.state.log.map((l) => {
+    const e = byId.get(l.event), c = e?.choices[l.choice];
+    const d = l.changes.map((x) => `${T(pack.stats[x.key].label)} ${x.delta > 0 ? '+' : ''}${x.delta}`).join(' · ');
+    return `<li><span class="muted">${esc(T(pack.turnLabel).replace('{n}', l.turn))}</span> <b>${esc(T(e?.title))}</b> → ${esc(T(c?.label))}${d ? `<div class="delta">${esc(d)}</div>` : ''}</li>`;
+  });
+  return rows.length ? `<details class="card log"><summary>${u('log')} (${rows.length})</summary><ol>${rows.join('')}</ol></details>` : '';
 }
 function title() {
   const saved = localStorage.getItem(KEY);
@@ -35,7 +45,7 @@ function render() {
   if (s.ended) {
     localStorage.removeItem(KEY);
     const e = game.ending();
-    app.innerHTML = head + res + `<div class="card"><p class="muted">${u('ending')}</p><h2>${esc(F(e?.title))}</h2><p>${esc(F(e?.text))}</p></div><button class="primary" id="again">${u('again')}</button>`;
+    app.innerHTML = head + res + `<div class="card"><p class="muted">${u('ending')}</p><h2>${esc(F(e?.title))}</h2><p>${esc(F(e?.text))}</p></div>${timeline()}<button class="primary" id="again">${u('again')}</button>`;
     document.getElementById('again').onclick = () => { game = createGame(pack); last = null; render(); };
     return;
   }

@@ -14,7 +14,7 @@ Small steps, roughly one per day.
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [x] Validator: warn on flags that are checked but never set (and vice versa)
 - [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
-- [ ] Demo: run log / timeline on the ending screen
+- [x] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack
 - [x] Docs: `docs/pack-format.md` with every field
 - [ ] Second tiny sample pack to prove packs are swappable (`?pack=` URL param)
