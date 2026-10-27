@@ -4,7 +4,7 @@
 //   while (!g.state.ended) { const e = g.current(); g.choose(0); }
 //
 // Each turn: fixed events for that turn first, then `perTurn` events drawn from
-// the pool (weighted, filtered by `turns`, `when`, `once`). After the last turn,
+// the pool (weighted, filtered by `turns`, `when`, `once`, `cooldown`). After the last turn,
 // or as soon as an `immediate` ending matches, the first matching ending wins.
 import { check } from './conditions.js';
 import { applyEffect } from './effects.js';
@@ -20,8 +20,17 @@ export function newState(pack, seed = randomSeed()) {
 
 const inTurns = (e, t) => !e.turns || (t >= e.turns[0] && t <= (e.turns[1] ?? e.turns[0]));
 
+// A repeatable event (`once: false`) with `cooldown: n` sits out the n turns after it was last shown.
+function coolingDown(e, state) {
+  if (!(e.cooldown > 0)) return false;
+  for (let i = state.log.length - 1; i >= 0; i--)
+    if (state.log[i].event === e.id) return state.turn - state.log[i].turn <= e.cooldown;
+  return false;
+}
+
 export function eligible(pack, state) {
-  return pack.events.filter((e) => !e.fixed && inTurns(e, state.turn) && check(state, e.when) && !(e.once !== false && state.seen.includes(e.id)));
+  return pack.events.filter((e) => !e.fixed && inTurns(e, state.turn) && check(state, e.when)
+    && !(e.once !== false && state.seen.includes(e.id)) && !coolingDown(e, state));
 }
 
 function fillQueue(pack, state) {
@@ -103,6 +112,7 @@ export function validatePack(pack) {
     if (ids.has(e.id)) errs.push('duplicate event id ' + e.id);
     ids.add(e.id);
     if (!e.choices?.length) errs.push(`${e.id}: no choices`);
+    if (e.cooldown !== undefined && !(Number.isInteger(e.cooldown) && e.cooldown >= 0)) errs.push(`${e.id}: cooldown must be a whole number >= 0`);
     for (const c of e.choices ?? []) for (const k of Object.keys({ ...c.effect, ...c.success?.effect, ...c.failure?.effect }))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: unknown stat "${k}"`);
   }
@@ -124,6 +134,8 @@ export function packWarnings(pack) {
     }
     if (e.fixed !== undefined && e.fixed !== false && !(e.fixed >= 1 && e.fixed <= T))
       warns.push(`${e.id}: fixed turn ${e.fixed} is outside 1..${T}, the event can never appear`);
+    if (e.cooldown > 0 && e.once !== false) warns.push(`${e.id}: cooldown has no effect unless once is false`);
+    if (e.cooldown > 0 && e.fixed) warns.push(`${e.id}: cooldown has no effect on a fixed event`);
   }
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);

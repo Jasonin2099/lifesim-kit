@@ -133,3 +133,38 @@ test('warnings for flags checked but never set, and set but never checked', () =
   assert.ok(w.includes('flag "typo_flag" is checked but never set'), w.join('\n'));
   assert.ok(w.includes('flag "lonely" is set but never checked'), w.join('\n'));
 });
+
+test('cooldown keeps a repeatable event away for n turns', () => {
+  const p = {
+    id: 'cd', turns: 8, perTurn: 1, stats: { x: { initial: 0 } },
+    events: [
+      { id: 'tick', once: false, cooldown: 2, weight: 1000, choices: [{ label: 'ok', effect: { x: 1 } }] },
+      { id: 'filler', once: false, choices: [{ label: 'ok' }] },
+    ],
+    endings: [{ id: 'end' }],
+  };
+  assert.deepEqual(packWarnings(p), []);
+  for (let seed = 1; seed <= 20; seed++) {
+    const turns = playRun(p, strategies.first, seed).state.log.filter((l) => l.event === 'tick').map((l) => l.turn);
+    assert.deepEqual(turns, [1, 4, 7], `seed ${seed}`);
+  }
+  // without a cooldown the heavy event shows up every turn
+  const q = structuredClone(p); delete q.events[0].cooldown;
+  assert.equal(playRun(q, strategies.first, 1).state.log.filter((l) => l.event === 'tick').length, 8);
+  // cooldown survives save / load (it reads the run log)
+  const g = createGame(p, { seed: 3 }); g.choose(0); g.choose(0);
+  const g2 = loadGame(p, g.save());
+  while (!g.state.ended) { g.choose(0); g2.choose(0); }
+  assert.deepEqual(g.state, g2.state);
+});
+
+test('cooldown is validated and warned about', () => {
+  const p = structuredClone(pack);
+  p.events[1].cooldown = -1;
+  assert.throws(() => validatePack(p), /cooldown must be a whole number/);
+  p.events[1].cooldown = 2; // once defaults to true
+  p.events[0].cooldown = 1; p.events[0].once = false; // day_one is fixed
+  const w = packWarnings(p);
+  assert.ok(w.some((x) => /lunch: cooldown has no effect unless once is false/.test(x)), w.join('\n'));
+  assert.ok(w.some((x) => /day_one: cooldown has no effect on a fixed event/.test(x)), w.join('\n'));
+});

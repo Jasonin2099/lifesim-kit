@@ -8,7 +8,7 @@ Small steps, roughly one per day.
 - [x] Simulator: add a `reckless` bot (always the choice with the biggest total delta)
 - [x] Simulator: `--bot` flag to run only one bot
 - [x] Simulator: per-turn stat curve (median per turn) in the JSON report, `--curve` to print it
-- [ ] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
+- [x] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
 - [x] Engine: text templates — `{stat:money}`, `{turn}`, `{flag:x?yes|no}` inside event text
 - [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`

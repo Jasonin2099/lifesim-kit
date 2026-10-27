@@ -44,6 +44,7 @@ simulator) lists things that load fine but are probably wrong.
 | `when` | always | [Condition](#conditions) that must pass for the event to be drawn or shown. |
 | `weight` | `1` | Relative chance when drawing from the pool. `0` never draws. |
 | `once` | `true` | Set `false` to let the event come back after it has been seen. |
+| `cooldown` | `0` | With `once: false`: after the event is shown it sits out this many turns (`2` → seen on turn 3, back from turn 6). Must be a whole number ≥ 0. Warns if set on a `once` or `fixed` event, where it does nothing. |
 | `choices` | **at least one** | See below. |
 
 Each turn: fixed events for that turn, then `perTurn` events drawn by weight from the

@@ -20,6 +20,7 @@
   - 回合制：每回合先出固定事件，再从事件池按权重抽 `perTurn` 个
   - 一套共用的条件语法：`{stat, min, max}` `{flag}` `{turn}` `{seen}` `{all|any|not}`
   - 选项可以带成功率（`chance` + `success` / `failure`）、数值区间随机（`[lo, hi]`）
+  - 可重复事件（`once: false`），可加 `cooldown: n` 让它出现后隔 n 回合再来
   - 带种子的随机数，状态存在存档里，读档后随机序列也接得上
   - `validatePack()` 会抓拼错的数值名、重复 id、缺兜底结局；`packWarnings()` 提醒 `turns` / `fixed` 超出回合数、永远不会出现的事件（模拟器开头会打印）
 - `tools/simulate.mjs` 批量模拟：让几种机器人各玩一千局，看结局分布、数值中位数、哪些事件从来没出现过

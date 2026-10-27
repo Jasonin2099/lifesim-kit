@@ -14,6 +14,7 @@ A tiny engine for text-based life-sim games. The story lives in JSON; the engine
   - turn loop: fixed events for the turn first, then `perTurn` weighted draws from the pool
   - one condition language everywhere: `{stat, min, max}` `{flag}` `{turn}` `{seen}` `{all|any|not}`
   - choices with odds (`chance` + `success` / `failure`) and ranged effects (`[lo, hi]`)
+  - repeatable events (`once: false`) with an optional `cooldown: n` so they sit out n turns after showing up
   - seeded RNG stored in the save, so a loaded game continues the same random sequence
   - `validatePack()` catches misspelled stats, duplicate ids, a missing fallback ending; `packWarnings()` flags events whose `turns` / `fixed` fall outside the pack's turn count (the simulator prints these first)
 - `tools/simulate.mjs` — bots play a thousand runs each; prints ending rates, median stats, and events/endings nobody ever reached
