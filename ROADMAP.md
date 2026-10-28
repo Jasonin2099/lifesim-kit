@@ -10,7 +10,7 @@ Small steps, roughly one per day.
 - [x] Simulator: per-turn stat curve (median per turn) in the JSON report, `--curve` to print it
 - [x] Engine: `once: false` events with a cooldown (`cooldown: 2` turns)
 - [x] Engine: text templates — `{stat:money}`, `{turn}`, `{flag:x?yes|no}` inside event text
-- [ ] Engine: `onEnter` effect for events (applies when shown, before choosing)
+- [x] Engine: `onEnter` effect for events (applies when shown, before choosing)
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [x] Validator: warn on flags that are checked but never set (and vice versa)
 - [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
