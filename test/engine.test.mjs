@@ -169,6 +169,49 @@ test('cooldown is validated and warned about', () => {
   assert.ok(w.some((x) => /day_one: cooldown has no effect on a fixed event/.test(x)), w.join('\n'));
 });
 
+test('onEnter applies once when the event is shown, before choosing, and survives save / load', () => {
+  const p = {
+    id: 'oe', turns: 3, perTurn: 1, stats: { x: { initial: 10, min: 0, max: 20 } },
+    events: [
+      { id: 'storm', fixed: 2, onEnter: { x: -4, flag: 'wet' }, choices: [
+        { label: 'dry off', when: { flag: 'wet' }, effect: { unflag: 'wet' } },
+        { label: 'never shown', when: { flag: 'wet', eq: false } },
+      ] },
+      { id: 'calm', once: false, choices: [{ label: 'ok', effect: { x: 1 } }] },
+    ],
+    endings: [{ id: 'end' }],
+  };
+  assert.deepEqual(packWarnings(p), []);
+  const g = createGame(p, { seed: 1 });
+  assert.equal(g.current().id, 'calm');
+  assert.deepEqual(g.entered(), []);
+  g.choose(0); // turn 1 -> 2: storm is shown and its onEnter runs now
+  assert.equal(g.current().id, 'storm');
+  assert.equal(g.state.stats.x, 7);
+  assert.deepEqual(g.entered(), [{ key: 'x', delta: -4 }]);
+  assert.deepEqual(g.choices().map((c) => c.index), [0]); // choice conditions see the onEnter flag
+  // loading a save made while storm is showing must not apply it again
+  const g2 = loadGame(p, g.save());
+  assert.equal(g2.state.stats.x, 7);
+  g.choose(0); g2.choose(0);
+  assert.deepEqual(g.state, g2.state);
+  assert.equal(g.state.stats.x, 7);
+  assert.deepEqual(g.state.log[1].entered, [{ key: 'x', delta: -4 }]);
+  assert.equal(g.state.log[0].entered, undefined);
+  // onEnter on the very first event of a run
+  const q = structuredClone(p); q.events[0].fixed = 1;
+  assert.equal(createGame(q, { seed: 1 }).state.stats.x, 6);
+});
+
+test('onEnter stats are validated, onEnter flags count as set', () => {
+  const p = structuredClone(pack);
+  p.events[1].onEnter = { enregy: -5 };
+  assert.throws(() => validatePack(p), /onEnter: unknown stat "enregy"/);
+  p.events[1].onEnter = { flag: 'only_from_on_enter' };
+  p.endings.unshift({ id: 'x', when: { flag: 'only_from_on_enter' }, title: 'x', text: 'x' });
+  assert.ok(!packWarnings(p).some((w) => w.includes('only_from_on_enter')));
+});
+
 // every pack under packs/ must load, end every run, and be listed in the demo's ?pack= list
 import { readdirSync } from 'node:fs';
 const packDirs = readdirSync(new URL('../packs/', import.meta.url), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);

@@ -30,7 +30,8 @@
       ] },
     { "id": "rain", "turns": [2, 5],
       "title": { "zh": "下雨", "en": "Rain" },
-      "text": { "zh": "九点开始下雨，人一下子少了。", "en": "It starts raining at nine. The crowd thins out." },
+      "text": { "zh": "九点开始下雨，人一下子少了。摆在外面的两个饭团被淋湿了。", "en": "It starts raining at nine. The crowd thins out, and two rice balls on the counter get soaked." },
+      "onEnter": { "stock": -2 },
       "choices": [
         { "label": { "zh": "早点收摊", "en": "Pack up early" }, "effect": { "energy": 10 }, "result": { "zh": "回家泡了个澡。", "en": "You go home and take a bath." } },
         { "label": { "zh": "撑伞硬守", "en": "Stay under the awning" }, "chance": 0.5,

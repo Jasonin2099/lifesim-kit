@@ -17,6 +17,7 @@ const u = (k) => UI[lang][k];
 const app = document.getElementById('app');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 let game = null, last = null;
+const deltas = (cs) => cs.map((c) => `${T(pack.stats[c.key].label)} ${c.delta > 0 ? '+' : ''}${c.delta}`).join(' · ');
 
 function stats() {
   return `<div class="card stats">${Object.entries(pack.stats).map(([k, d]) => {
@@ -29,7 +30,7 @@ function timeline() {
   const byId = new Map(pack.events.map((e) => [e.id, e]));
   const rows = game.state.log.map((l) => {
     const e = byId.get(l.event), c = e?.choices[l.choice];
-    const d = l.changes.map((x) => `${T(pack.stats[x.key].label)} ${x.delta > 0 ? '+' : ''}${x.delta}`).join(' · ');
+    const d = deltas([...(l.entered ?? []), ...l.changes]);
     return `<li><span class="muted">${esc(T(pack.turnLabel).replace('{n}', l.turn))}</span> <b>${esc(T(e?.title))}</b> → ${esc(T(c?.label))}${d ? `<div class="delta">${esc(d)}</div>` : ''}</li>`;
   });
   return rows.length ? `<details class="card log"><summary>${u('log')} (${rows.length})</summary><ol>${rows.join('')}</ol></details>` : '';
@@ -47,7 +48,7 @@ function render() {
   localStorage.setItem(KEY, game.save());
   const s = game.state;
   const head = `<p class="muted">${esc(T(pack.turnLabel).replace('{n}', s.turn))} / ${pack.turns}</p>${stats()}`;
-  const res = last ? `<div class="card result">${esc(F(last.result))}<div class="delta">${last.changes.map((c) => `${T(pack.stats[c.key].label)} ${c.delta > 0 ? '+' : ''}${c.delta}`).join(' · ')}</div></div>` : '';
+  const res = last ? `<div class="card result">${esc(F(last.result))}<div class="delta">${deltas(last.changes)}</div></div>` : '';
   if (s.ended) {
     localStorage.removeItem(KEY);
     const e = game.ending();
@@ -55,8 +56,8 @@ function render() {
     document.getElementById('again').onclick = () => { game = createGame(pack); last = null; render(); };
     return;
   }
-  const e = game.current();
-  app.innerHTML = head + res + `<div class="card"><h2>${esc(F(e.title))}</h2><p>${esc(F(e.text))}</p>${game.choices().map((c, n) => `<button class="choice" data-i="${c.index}"><kbd>${n + 1}</kbd> ${esc(F(c.label))}</button>`).join('')}</div>`;
+  const e = game.current(), ent = game.entered();
+  app.innerHTML = head + res + `<div class="card"><h2>${esc(F(e.title))}</h2><p>${esc(F(e.text))}</p>${ent.length ? `<div class="delta">${esc(deltas(ent))}</div>` : ''}${game.choices().map((c, n) => `<button class="choice" data-i="${c.index}"><kbd>${n + 1}</kbd> ${esc(F(c.label))}</button>`).join('')}</div>`;
   app.querySelectorAll('button.choice').forEach((b) => (b.onclick = () => { last = game.choose(+b.dataset.i); render(); }));
 }
 // 1–9 picks the n-th visible choice; Enter presses the main button (start / play again)

@@ -6,6 +6,8 @@
 // Each turn: fixed events for that turn first, then `perTurn` events drawn from
 // the pool (weighted, filtered by `turns`, `when`, `once`, `cooldown`). After the last turn,
 // or as soon as an `immediate` ending matches, the first matching ending wins.
+// An event's `onEnter` effect is applied once, when it becomes the current event
+// (before the player chooses); `state.entered` keeps what it changed.
 import { check } from './conditions.js';
 import { applyEffect } from './effects.js';
 import { next, pickWeighted, randomSeed } from './rng.js';
@@ -54,24 +56,32 @@ export function createGame(pack, { seed, state } = {}) {
   validatePack(pack);
   const byId = new Map(pack.events.map((e) => [e.id, e]));
   const s = state ?? newState(pack, seed);
-  if (!state) fillQueue(pack, s);
 
   const end = (ending) => { s.ended = true; s.ending = ending?.id ?? null; };
+  // apply the new current event's onEnter once; saved in state, so loading never re-applies it
+  const enter = () => {
+    const e = byId.get(s.queue[0]);
+    s.entered = e?.onEnter ? { event: e.id, changes: applyEffect(pack, s, e.onEnter) } : null;
+  };
   const advance = () => {
     const imm = findEnding(pack, s, true);
     if (imm) return end(imm);
-    if (s.queue.length) return;
+    if (s.queue.length) return enter();
     if (s.turn >= pack.turns) return end(findEnding(pack, s, false));
     s.turn++;
     if (pack.perTurnEffect) applyEffect(pack, s, pack.perTurnEffect);
     fillQueue(pack, s);
-    if (!s.queue.length) advance();
+    if (!s.queue.length) return advance();
+    enter();
   };
+  if (!state) { fillQueue(pack, s); enter(); }
 
   return {
     pack,
     get state() { return s; },
     current() { return s.ended ? null : byId.get(s.queue[0]) ?? null; },
+    /** what the current event's onEnter just changed ([] if it has none) */
+    entered() { const e = this.current(); return e && s.entered?.event === e.id ? s.entered.changes : []; },
     /** choices available right now (those whose `when` passes), with their original index */
     choices() {
       const e = this.current();
@@ -85,9 +95,10 @@ export function createGame(pack, { seed, state } = {}) {
       let outcome = c;
       if (c.chance !== undefined) outcome = next(s) < c.chance ? c.success ?? c : c.failure ?? {};
       const changes = applyEffect(pack, s, outcome.effect);
+      const entered = s.entered?.event === e.id ? s.entered.changes : null;
       s.seen.push(e.id);
       s.queue.shift();
-      s.log.push({ turn: s.turn, event: e.id, choice: index, result: outcome.result ?? '', changes });
+      s.log.push({ turn: s.turn, event: e.id, choice: index, result: outcome.result ?? '', changes, ...(entered?.length ? { entered } : {}) });
       advance();
       return { result: outcome.result ?? '', changes };
     },
@@ -113,6 +124,8 @@ export function validatePack(pack) {
     ids.add(e.id);
     if (!e.choices?.length) errs.push(`${e.id}: no choices`);
     if (e.cooldown !== undefined && !(Number.isInteger(e.cooldown) && e.cooldown >= 0)) errs.push(`${e.id}: cooldown must be a whole number >= 0`);
+    for (const k of Object.keys(e.onEnter ?? {}))
+      if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: onEnter: unknown stat "${k}"`);
     for (const c of e.choices ?? []) for (const k of Object.keys({ ...c.effect, ...c.success?.effect, ...c.failure?.effect }))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: unknown stat "${k}"`);
   }
@@ -156,6 +169,7 @@ function flagUse(pack) {
   eff(pack.perTurnEffect);
   for (const e of pack.events ?? []) {
     walk(e.when);
+    eff(e.onEnter);
     for (const c of e.choices ?? []) { walk(c.when); eff(c.effect); eff(c.success?.effect); eff(c.failure?.effect); }
   }
   for (const e of pack.endings ?? []) walk(e.when);
