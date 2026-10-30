@@ -2,7 +2,7 @@
 // Batch-play a pack with bots and print ending rates, final stats and event coverage.
 //   node tools/simulate.mjs [packs/first-job/pack.json] [--n 1000] [--seed 1] [--json out.json] [--bot reckless] [--curve]
 import { readFileSync, writeFileSync } from 'node:fs';
-import { playRun, botsFor } from '../engine/autoplay.js';
+import { botsFor, simulate, median } from '../engine/autoplay.js';
 import { packWarnings } from '../engine/game.js';
 
 const args = process.argv.slice(2);
@@ -10,29 +10,8 @@ const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i
 const file = args.find((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--')) ?? new URL('../packs/first-job/pack.json', import.meta.url);
 const pack = JSON.parse(readFileSync(file, 'utf8'));
 const N = Number(opt('n', 1000)), seed0 = Number(opt('seed', 1));
-const median = (v) => [...v].sort((a, b) => a - b)[v.length >> 1];
 const name = (x) => (typeof x === 'object' ? x.en ?? Object.values(x)[0] : x);
 for (const w of packWarnings(pack)) console.warn('warning: ' + w);
-
-export function simulate(pack, pick, n, seed0 = 1) {
-  const r = { runs: n, endings: {}, stats: {}, seen: {}, curve: [] };
-  const perTurn = []; // perTurn[t][stat] = values at the start of turn t+1, one per run that got there
-  for (let i = 0; i < n; i++) {
-    let last = 0;
-    const watch = (g) => {
-      const t = g.state.turn;
-      if (t !== last) for (const [k, v] of Object.entries(g.state.stats)) ((perTurn[t - 1] ??= {})[k] ??= []).push(v);
-      last = t;
-      return pick(g);
-    };
-    const s = playRun(pack, watch, seed0 + i * 7919).state;
-    r.endings[s.ending] = (r.endings[s.ending] ?? 0) + 1;
-    for (const [k, v] of Object.entries(s.stats)) (r.stats[k] ??= []).push(v);
-    for (const id of new Set(s.seen)) r.seen[id] = (r.seen[id] ?? 0) + 1;
-  }
-  r.curve = perTurn.map((byStat, t) => ({ turn: t + 1, runs: Object.values(byStat)[0].length, median: Object.fromEntries(Object.entries(byStat).map(([k, v]) => [k, median(v)])) }));
-  return r;
-}
 
 let bots;
 try { bots = botsFor(pack, opt('bot')); } catch (e) { console.error(e.message); process.exit(1); }
@@ -43,6 +22,11 @@ for (const [bot, pick] of Object.entries(bots)) {
   console.log(`\n[${bot}] ${N} runs`);
   for (const [id, c] of Object.entries(r.endings).sort((a, b) => b[1] - a[1])) console.log(`  ${pct(c)}  ${name(pack.endings.find((e) => e.id === id)?.title ?? id)}`);
   console.log('  median: ' + Object.entries(r.stats).map(([k, v]) => `${k} ${median(v)}`).join(' · '));
+  for (const [id, o] of Object.entries(r.onEnter)) {
+    const avg = Object.entries(o.delta).map(([k, v]) => `${k} ${v / o.shown >= 0 ? '+' : ''}${(v / o.shown).toFixed(1)}`).join(' · ') || 'no change';
+    const nominal = Object.entries(pack.events.find((e) => e.id === id).onEnter).filter(([k]) => k in pack.stats).map(([k, v]) => `${k} ${Array.isArray(v) ? v.join('..') : (v >= 0 ? '+' : '') + v}`).join(' · ');
+    console.log(`  onEnter ${id}: shown ${o.shown}× in ${pct(o.runs).trim()} of runs · avg ${avg} (pack: ${nominal})`);
+  }
 }
 const never = pack.events.filter((e) => !Object.values(report).some((r) => r.seen[e.id]));
 const unreached = pack.endings.filter((e) => !Object.values(report).some((r) => r.endings[e.id]));
