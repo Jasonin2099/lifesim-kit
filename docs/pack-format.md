@@ -46,7 +46,7 @@ simulator) lists things that load fine but are probably wrong.
 | `weight` | `1` | Relative chance when drawing from the pool. `0` never draws. |
 | `once` | `true` | Set `false` to let the event come back after it has been seen. |
 | `cooldown` | `0` | With `once: false`: after the event is shown it sits out this many turns (`2` → seen on turn 3, back from turn 6). Must be a whole number ≥ 0. Warns if set on a `once` or `fixed` event, where it does nothing. |
-| `onEnter` | none | [Effect](#effects) applied once, the moment the event becomes the current one (before the player chooses), so choice `when` conditions and `{stat:…}` text already see it. Stat keys must exist. What it changed is in `state.entered` / `game.entered()` and in the run log as `entered`; the demo shows it under the event text. Immediate endings are checked after the choice, as usual. |
+| `onEnter` | none | [Effect](#effects) applied once, the moment the event becomes the current one (before the player chooses), so choice `when` conditions and `{stat:…}` text already see it. Stat keys must exist. What it changed is in `state.entered` / `game.entered()` and in the run log as `entered`; the demo shows it under the event text, and `npm run simulate` prints, per bot, how often each onEnter fired and its average real change after clamping (`onEnter` in the `--json` report). Immediate endings are checked after the choice, as usual. |
 | `choices` | **at least one** | See below. |
 
 Each turn: fixed events for that turn, then `perTurn` events drawn by weight from the

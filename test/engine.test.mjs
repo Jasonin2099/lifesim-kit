@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createGame, loadGame, validatePack, packWarnings } from '../engine/game.js';
 import { check } from '../engine/conditions.js';
-import { playRun, strategies, botsFor } from '../engine/autoplay.js';
+import { playRun, strategies, botsFor, simulate } from '../engine/autoplay.js';
 
 const pack = JSON.parse(readFileSync(new URL('../packs/first-job/pack.json', import.meta.url)));
 
@@ -210,6 +210,28 @@ test('onEnter stats are validated, onEnter flags count as set', () => {
   p.events[1].onEnter = { flag: 'only_from_on_enter' };
   p.endings.unshift({ id: 'x', when: { flag: 'only_from_on_enter' }, title: 'x', text: 'x' });
   assert.ok(!packWarnings(p).some((w) => w.includes('only_from_on_enter')));
+});
+
+test('simulate reports how often onEnter fired and what it really changed (after clamping)', () => {
+  // x starts at 3, min 0: the first drain takes 3 (clamped), the second only what turn 2 added back
+  const p = {
+    id: 'sim-oe', turns: 2, perTurn: 1, stats: { x: { initial: 3, min: 0, max: 9 }, y: {} },
+    perTurnEffect: { x: 1 },
+    events: [
+      { id: 'drain', once: false, onEnter: { x: -5, flag: 'f' }, choices: [{ label: 'ok', effect: { y: 1 } }] },
+      { id: 'plain', fixed: 99, choices: [{ label: 'ok' }] },
+    ],
+    endings: [{ id: 'end' }],
+  };
+  const r = simulate(p, strategies.first, 4);
+  assert.deepEqual(r.onEnter, { drain: { shown: 8, runs: 4, delta: { x: -16 } } }); // per run: -3, then -1
+  assert.equal(r.endings.end, 4);
+  assert.deepEqual(r.stats.x, [0, 0, 0, 0]);
+  assert.equal(r.curve.length, 2);
+  // packs without onEnter report nothing; the rest of the report is unchanged
+  const plain = simulate(pack, strategies.random, 20);
+  assert.deepEqual(plain.onEnter, {});
+  assert.equal(Object.values(plain.endings).reduce((a, b) => a + b), 20);
 });
 
 // every pack under packs/ must load, end every run, and be listed in the demo's ?pack= list
