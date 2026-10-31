@@ -10,6 +10,8 @@
 // (before the player chooses); `state.entered` keeps what it changed. Immediate endings
 // are checked after every onEnter as well as after every choice: if an onEnter already
 // meets one, the run ends right there (the event is logged with `choice: null`).
+// `onEnterChance: 0..1` makes the onEnter roll the seeded RNG first and apply only below
+// that chance (packs without it never roll, so their runs are unchanged).
 import { check } from './conditions.js';
 import { applyEffect } from './effects.js';
 import { next, pickWeighted, randomSeed } from './rng.js';
@@ -69,7 +71,8 @@ export function createGame(pack, { seed, state } = {}) {
   };
   const enter = () => {
     const e = byId.get(s.queue[0]);
-    s.entered = e?.onEnter ? { event: e.id, changes: applyEffect(pack, s, e.onEnter) } : null;
+    const fires = e?.onEnter && (e.onEnterChance === undefined || next(s) < e.onEnterChance);
+    s.entered = fires ? { event: e.id, changes: applyEffect(pack, s, e.onEnter) } : null;
     if (s.entered && checkEnding()) {
       s.seen.push(e.id);
       s.queue.shift();
@@ -138,6 +141,8 @@ export function validatePack(pack) {
     if (e.cooldown !== undefined && !(Number.isInteger(e.cooldown) && e.cooldown >= 0)) errs.push(`${e.id}: cooldown must be a whole number >= 0`);
     for (const k of Object.keys(e.onEnter ?? {}))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: onEnter: unknown stat "${k}"`);
+    if (e.onEnterChance !== undefined && !(typeof e.onEnterChance === 'number' && e.onEnterChance >= 0 && e.onEnterChance <= 1))
+      errs.push(`${e.id}: onEnterChance must be a number from 0 to 1`);
     for (const c of e.choices ?? []) for (const k of Object.keys({ ...c.effect, ...c.success?.effect, ...c.failure?.effect }))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: unknown stat "${k}"`);
   }
@@ -161,6 +166,8 @@ export function packWarnings(pack) {
       warns.push(`${e.id}: fixed turn ${e.fixed} is outside 1..${T}, the event can never appear`);
     if (e.cooldown > 0 && e.once !== false) warns.push(`${e.id}: cooldown has no effect unless once is false`);
     if (e.cooldown > 0 && e.fixed) warns.push(`${e.id}: cooldown has no effect on a fixed event`);
+    if (e.onEnterChance !== undefined && !e.onEnter) warns.push(`${e.id}: onEnterChance has no effect without onEnter`);
+    else if (e.onEnterChance === 0) warns.push(`${e.id}: onEnterChance is 0, the onEnter never applies`);
   }
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);

@@ -293,3 +293,30 @@ test('a save from one pack does not load into another', () => {
   g.choose(0);
   assert.throws(() => loadGame(pack, g.save()));
 });
+
+test('onEnterChance applies the onEnter only on a seeded roll, and is validated', () => {
+  const p = {
+    id: 'oe-chance', turns: 1, perTurn: 1, stats: { x: { initial: 5, min: 0, max: 99 } },
+    events: [{ id: 'gust', once: false, onEnter: { x: -1 }, onEnterChance: 0.3, choices: [{ label: 'ok' }] }],
+    endings: [{ id: 'end' }],
+  };
+  // over many seeds roughly 30% fire, each seed is reproducible, and a skipped roll leaves entered null
+  let fired = 0;
+  for (let seed = 1; seed <= 2000; seed++) {
+    const g = createGame(p, { seed });
+    if (g.state.stats.x === 4) { fired++; assert.deepEqual(g.entered(), [{ key: 'x', delta: -1 }]); }
+    else { assert.equal(g.state.stats.x, 5); assert.equal(g.state.entered, null); assert.deepEqual(g.entered(), []); }
+    assert.equal(createGame(p, { seed }).state.stats.x, g.state.stats.x);
+  }
+  assert.ok(fired > 450 && fired < 750, `fired ${fired} / 2000`);
+  // 1 always fires, 0 never does
+  assert.equal(createGame({ ...p, events: [{ ...p.events[0], onEnterChance: 1 }] }, { seed: 3 }).state.stats.x, 4);
+  assert.equal(createGame({ ...p, events: [{ ...p.events[0], onEnterChance: 0 }] }, { seed: 3 }).state.stats.x, 5);
+  // validator and warnings
+  for (const bad of [1.5, -0.1, '0.5'])
+    assert.throws(() => validatePack({ ...p, events: [{ ...p.events[0], onEnterChance: bad }] }), /onEnterChance must be a number from 0 to 1/);
+  assert.deepEqual(packWarnings(p), []);
+  assert.match(packWarnings({ ...p, events: [{ ...p.events[0], onEnterChance: 0 }] }).join('\n'), /onEnterChance is 0/);
+  const { onEnter, ...noOnEnter } = p.events[0];
+  assert.match(packWarnings({ ...p, events: [noOnEnter] }).join('\n'), /onEnterChance has no effect without onEnter/);
+});
