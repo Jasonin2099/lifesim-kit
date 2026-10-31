@@ -203,6 +203,35 @@ test('onEnter applies once when the event is shown, before choosing, and survive
   assert.equal(createGame(q, { seed: 1 }).state.stats.x, 6);
 });
 
+test('an onEnter that meets an immediate ending ends the run at once, without showing choices', () => {
+  const p = {
+    id: 'oe-end', turns: 5, perTurn: 1, stats: { hp: { initial: 3, min: 0, max: 9 } },
+    events: [
+      { id: 'trap', fixed: 2, onEnter: { hp: -5 }, choices: [{ label: 'never picked', effect: { hp: 9 } }] },
+      { id: 'walk', once: false, choices: [{ label: 'ok' }] },
+    ],
+    endings: [{ id: 'dead', immediate: true, when: { stat: 'hp', max: 0 } }, { id: 'end' }],
+  };
+  const g = createGame(p, { seed: 1 });
+  assert.equal(g.current().id, 'walk');
+  g.choose(0); // turn 2: trap's onEnter drops hp to 0
+  assert.equal(g.state.ended, true);
+  assert.equal(g.state.ending, 'dead');
+  assert.equal(g.current(), null);
+  assert.deepEqual(g.choices(), []);
+  assert.equal(g.state.stats.hp, 0);
+  const last = g.state.log.at(-1);
+  assert.equal(last.event, 'trap');
+  assert.equal(last.choice, null);
+  assert.deepEqual(last.entered, [{ key: 'hp', delta: -3 }]);
+  // the same on the very first event, and the simulator counts it once
+  const q = structuredClone(p); q.events[0].fixed = 1;
+  assert.equal(createGame(q, { seed: 1 }).state.ending, 'dead');
+  const r = simulate(q, strategies.first, 3);
+  assert.deepEqual(r.endings, { dead: 3 });
+  assert.deepEqual(r.onEnter, { trap: { shown: 3, runs: 3, delta: { hp: -9 } } });
+});
+
 test('onEnter stats are validated, onEnter flags count as set', () => {
   const p = structuredClone(pack);
   p.events[1].onEnter = { enregy: -5 };
