@@ -31,7 +31,7 @@ function timeline() {
   const rows = game.state.log.map((l) => {
     const e = byId.get(l.event), c = e?.choices[l.choice];
     const d = deltas([...(l.entered ?? []), ...l.changes]);
-    return `<li><span class="muted">${esc(T(pack.turnLabel).replace('{n}', l.turn))}</span> <b>${esc(T(e?.title))}</b> → ${esc(T(c?.label))}${d ? `<div class="delta">${esc(d)}</div>` : ''}</li>`;
+    return `<li><span class="muted">${esc(T(pack.turnLabel).replace('{n}', l.turn))}</span> <b>${esc(T(e?.title))}</b>${c ? ` → ${esc(T(c.label))}` : ''}${d ? `<div class="delta">${esc(d)}</div>` : ''}</li>`;
   });
   return rows.length ? `<details class="card log"><summary>${u('log')} (${rows.length})</summary><ol>${rows.join('')}</ol></details>` : '';
 }

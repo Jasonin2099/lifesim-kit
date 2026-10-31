@@ -7,7 +7,9 @@
 // the pool (weighted, filtered by `turns`, `when`, `once`, `cooldown`). After the last turn,
 // or as soon as an `immediate` ending matches, the first matching ending wins.
 // An event's `onEnter` effect is applied once, when it becomes the current event
-// (before the player chooses); `state.entered` keeps what it changed.
+// (before the player chooses); `state.entered` keeps what it changed. Immediate endings
+// are checked after every onEnter as well as after every choice: if an onEnter already
+// meets one, the run ends right there (the event is logged with `choice: null`).
 import { check } from './conditions.js';
 import { applyEffect } from './effects.js';
 import { next, pickWeighted, randomSeed } from './rng.js';
@@ -59,13 +61,23 @@ export function createGame(pack, { seed, state } = {}) {
 
   const end = (ending) => { s.ended = true; s.ending = ending?.id ?? null; };
   // apply the new current event's onEnter once; saved in state, so loading never re-applies it
+  // end the run if an immediate ending matches now; true if it did
+  const checkEnding = () => {
+    const imm = findEnding(pack, s, true);
+    if (imm) end(imm);
+    return !!imm;
+  };
   const enter = () => {
     const e = byId.get(s.queue[0]);
     s.entered = e?.onEnter ? { event: e.id, changes: applyEffect(pack, s, e.onEnter) } : null;
+    if (s.entered && checkEnding()) {
+      s.seen.push(e.id);
+      s.queue.shift();
+      s.log.push({ turn: s.turn, event: e.id, choice: null, result: '', changes: [], entered: s.entered.changes });
+    }
   };
   const advance = () => {
-    const imm = findEnding(pack, s, true);
-    if (imm) return end(imm);
+    if (checkEnding()) return;
     if (s.queue.length) return enter();
     if (s.turn >= pack.turns) return end(findEnding(pack, s, false));
     s.turn++;
