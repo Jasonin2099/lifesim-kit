@@ -24,7 +24,9 @@ for (const [bot, pick] of Object.entries(bots)) {
   console.log('  median: ' + Object.entries(r.stats).map(([k, v]) => `${k} ${median(v)}`).join(' · '));
   for (const [id, o] of Object.entries(r.onEnter)) {
     const avg = Object.entries(o.delta).map(([k, v]) => `${k} ${v / o.shown >= 0 ? '+' : ''}${(v / o.shown).toFixed(1)}`).join(' · ') || 'no change';
-    const nominal = Object.entries(pack.events.find((e) => e.id === id).onEnter).filter(([k]) => k in pack.stats).map(([k, v]) => `${k} ${Array.isArray(v) ? v.join('..') : (v >= 0 ? '+' : '') + v}`).join(' · ');
+    const ev = pack.events.find((e) => e.id === id);
+    const odds = ev.onEnterChance === undefined ? '' : `${Math.round(ev.onEnterChance * 100)}%: `;
+    const nominal = odds + Object.entries(ev.onEnter).filter(([k]) => k in pack.stats).map(([k, v]) => `${k} ${Array.isArray(v) ? v.join('..') : (v >= 0 ? '+' : '') + v}`).join(' · ');
     console.log(`  onEnter ${id}: shown ${o.shown}× in ${pct(o.runs).trim()} of runs · avg ${avg} (pack: ${nominal})`);
   }
 }
