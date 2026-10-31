@@ -12,3 +12,4 @@
 
 ### Added
 - Simulator report of how often each `onEnter` fired and its real (clamped) change.
+- Simulator prints the average number of steps (choices) per ending (`steps` in `--json`).

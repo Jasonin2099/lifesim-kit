@@ -20,7 +20,7 @@ for (const [bot, pick] of Object.entries(bots)) {
   const r = (report[bot] = simulate(pack, pick, N, seed0));
   const pct = (v) => ((100 * v) / N).toFixed(0).padStart(3) + '%';
   console.log(`\n[${bot}] ${N} runs`);
-  for (const [id, c] of Object.entries(r.endings).sort((a, b) => b[1] - a[1])) console.log(`  ${pct(c)}  ${name(pack.endings.find((e) => e.id === id)?.title ?? id)}`);
+  for (const [id, c] of Object.entries(r.endings).sort((a, b) => b[1] - a[1])) console.log(`  ${pct(c)}  ${name(pack.endings.find((e) => e.id === id)?.title ?? id)}  · avg ${r.steps[id]} steps`);
   console.log('  median: ' + Object.entries(r.stats).map(([k, v]) => `${k} ${median(v)}`).join(' · '));
   for (const [id, o] of Object.entries(r.onEnter)) {
     const avg = Object.entries(o.delta).map(([k, v]) => `${k} ${v / o.shown >= 0 ? '+' : ''}${(v / o.shown).toFixed(1)}`).join(' · ') || 'no change';

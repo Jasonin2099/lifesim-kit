@@ -26,7 +26,7 @@ A tiny engine for text-based life-sim games. The story lives in JSON; the engine
 
 ```bash
 npm test
-npm run simulate
+npm run simulate              # ending rates and average steps per ending
 npm run simulate -- --curve   # also print the median of each stat at the start of every turn
 npm run serve     # http://localhost:8000
 ```
