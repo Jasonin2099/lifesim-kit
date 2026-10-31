@@ -26,7 +26,7 @@
 
 ```bash
 npm test
-npm run simulate
+npm run simulate              # 結末ごとの割合と平均ステップ数
 npm run simulate -- --curve   # ターンごとの数値の中央値も表示
 npm run serve     # http://localhost:8000
 ```

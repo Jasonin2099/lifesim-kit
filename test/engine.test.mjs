@@ -229,6 +229,7 @@ test('an onEnter that meets an immediate ending ends the run at once, without sh
   assert.equal(createGame(q, { seed: 1 }).state.ending, 'dead');
   const r = simulate(q, strategies.first, 3);
   assert.deepEqual(r.endings, { dead: 3 });
+  assert.deepEqual(r.steps, { dead: 1 }); // the onEnter ending is one step, not two
   assert.deepEqual(r.onEnter, { trap: { shown: 3, runs: 3, delta: { hp: -9 } } });
 });
 
@@ -255,6 +256,7 @@ test('simulate reports how often onEnter fired and what it really changed (after
   const r = simulate(p, strategies.first, 4);
   assert.deepEqual(r.onEnter, { drain: { shown: 8, runs: 4, delta: { x: -16 } } }); // per run: -3, then -1
   assert.equal(r.endings.end, 4);
+  assert.deepEqual(r.steps, { end: 2 });
   assert.deepEqual(r.stats.x, [0, 0, 0, 0]);
   assert.equal(r.curve.length, 2);
   // packs without onEnter report nothing; the rest of the report is unchanged

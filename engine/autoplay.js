@@ -40,9 +40,9 @@ export const median = (v) => [...v].sort((a, b) => a - b)[v.length >> 1];
 
 // Play n runs with one bot and collect: ending counts, final stats, how many runs saw each event,
 // onEnter totals per event ({ shown, runs, delta: { stat: summed real change } }) and the
-// per-turn median curve. Used by tools/simulate.mjs.
+// per-turn median curve, plus average steps (logged events, i.e. choices made) per ending in `steps`. Used by tools/simulate.mjs.
 export function simulate(pack, pick, n, seed0 = 1) {
-  const r = { runs: n, endings: {}, stats: {}, seen: {}, onEnter: {}, curve: [] };
+  const r = { runs: n, endings: {}, steps: {}, stats: {}, seen: {}, onEnter: {}, curve: [] };
   const byId = new Map(pack.events.map((e) => [e.id, e]));
   const perTurn = []; // perTurn[t][stat] = values at the start of turn t+1, one per run that got there
   for (let i = 0; i < n; i++) {
@@ -55,6 +55,7 @@ export function simulate(pack, pick, n, seed0 = 1) {
     };
     const s = playRun(pack, watch, seed0 + i * 7919).state;
     r.endings[s.ending] = (r.endings[s.ending] ?? 0) + 1;
+    r.steps[s.ending] = (r.steps[s.ending] ?? 0) + s.log.length;
     for (const [k, v] of Object.entries(s.stats)) (r.stats[k] ??= []).push(v);
     for (const id of new Set(s.seen)) r.seen[id] = (r.seen[id] ?? 0) + 1;
     // onEnter: how often each event's onEnter fired and what it really changed (after clamping)
@@ -67,6 +68,7 @@ export function simulate(pack, pick, n, seed0 = 1) {
     }
     for (const id of hit) r.onEnter[id].runs++;
   }
+  for (const id of Object.keys(r.steps)) r.steps[id] = Math.round((10 * r.steps[id]) / r.endings[id]) / 10;
   r.curve = perTurn.map((byStat, t) => ({ turn: t + 1, runs: Object.values(byStat)[0].length, median: Object.fromEntries(Object.entries(byStat).map(([k, v]) => [k, median(v)])) }));
   return r;
 }
