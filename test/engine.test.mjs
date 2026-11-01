@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createGame, loadGame, validatePack, packWarnings } from '../engine/game.js';
 import { check } from '../engine/conditions.js';
+import { applyEffect } from '../engine/effects.js';
+import { next, pickWeighted } from '../engine/rng.js';
 import { playRun, strategies, botsFor, simulate } from '../engine/autoplay.js';
 
 const pack = JSON.parse(readFileSync(new URL('../packs/first-job/pack.json', import.meta.url)));
@@ -319,4 +321,59 @@ test('onEnterChance applies the onEnter only on a seeded roll, and is validated'
   assert.match(packWarnings({ ...p, events: [{ ...p.events[0], onEnterChance: 0 }] }).join('\n'), /onEnterChance is 0/);
   const { onEnter, ...noOnEnter } = p.events[0];
   assert.match(packWarnings({ ...p, events: [noOnEnter] }).join('\n'), /onEnterChance has no effect without onEnter/);
+});
+
+test('effect values: numbers and [lo, hi] only, flag names only; reversed range is a warning', () => {
+  const p = {
+    id: 'eff', turns: 2, perTurn: 1, stats: { m: { initial: 50, min: 0, max: 100 } },
+    perTurnEffect: { m: 1 },
+    events: [{ id: 'e', once: false, onEnter: { m: [1, 3] }, choices: [{ label: 'a', effect: { m: -2, flag: 'x', unflag: ['x'] } }] }],
+    endings: [{ id: 'end', when: { flag: 'x' } }, { id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const withEff = (where, eff) => {
+    const q = structuredClone(p);
+    if (where === 'perTurn') q.perTurnEffect = eff;
+    else if (where === 'onEnter') q.events[0].onEnter = eff;
+    else if (where === 'success') q.events[0].choices[0] = { label: 'a', chance: 0.5, success: { effect: eff }, failure: { effect: {} } };
+    else q.events[0].choices[0].effect = eff;
+    return q;
+  };
+  for (const where of ['perTurn', 'onEnter', 'choice', 'success'])
+    for (const bad of [{ m: '3' }, { m: [5] }, { m: [1, 'x'] }, { m: [1, 2, 3] }, { m: null }, { m: NaN }, { flag: 5 }, { unflag: [''] }])
+      assert.throws(() => validatePack(withEff(where, bad)), /must be a number or \[lo, hi\]|must be a flag name/, `${where} ${JSON.stringify(bad)}`);
+  assert.throws(() => validatePack(withEff('perTurn', { mood: 1 })), /perTurnEffect: unknown stat "mood"/);
+  assert.match(packWarnings(withEff('onEnter', { m: [5, 1] })).join('\n'), /e: onEnter: "m" range \[5, 1\] is reversed/);
+  assert.match(packWarnings(withEff('perTurn', { m: [3, 0] })).join('\n'), /perTurnEffect: "m" range \[3, 0\] is reversed/);
+});
+
+test('applyEffect: [lo, hi] stays in range and hits both ends, clamps, sets and clears flags', () => {
+  const p = { stats: { m: { min: 0, max: 100 } } };
+  const seen = new Set();
+  for (let seed = 1; seed <= 500; seed++) {
+    const s = { stats: { m: 50 }, flags: {}, rng: seed };
+    const [ch] = applyEffect(p, s, { m: [-2, 2] });
+    const d = s.stats.m - 50;
+    assert.ok(Number.isInteger(d) && d >= -2 && d <= 2, `delta ${d}`);
+    assert.deepEqual(ch ? ch.delta : 0, d);
+    seen.add(d);
+  }
+  assert.deepEqual([...seen].sort((a, b) => a - b), [-2, -1, 0, 1, 2]);
+  const s = { stats: { m: 98, other: 1 }, flags: { old: true }, rng: 7 };
+  assert.deepEqual(applyEffect(p, s, { m: 10, other: 0, nostat: 5, flag: ['a', 'b'], unflag: 'old' }), [{ key: 'm', delta: 2 }]);
+  assert.deepEqual(s.stats, { m: 100, other: 1 });
+  assert.deepEqual(s.flags, { a: true, b: true });
+});
+
+test('rng: next() is seeded, in [0, 1), and pickWeighted respects weights', () => {
+  const a = { rng: 42 }, b = { rng: 42 };
+  for (let i = 0; i < 1000; i++) { const x = next(a); assert.equal(x, next(b)); assert.ok(x >= 0 && x < 1); }
+  const list = [{ id: 'never', weight: 0 }, { id: 'neg', weight: -3 }, { id: 'one', weight: 1 }, { id: 'three', weight: 3 }];
+  const n = { never: 0, neg: 0, one: 0, three: 0 }, s = { rng: 9 };
+  for (let i = 0; i < 4000; i++) n[pickWeighted(s, list).id]++;
+  assert.equal(n.never + n.neg, 0);
+  assert.ok(n.three / n.one > 2.5 && n.three / n.one < 3.5, JSON.stringify(n));
+  assert.equal(pickWeighted({ rng: 1 }, [{ weight: 0 }, { weight: -1 }]), null);
+  assert.equal(pickWeighted({ rng: 1 }, []), null);
 });
