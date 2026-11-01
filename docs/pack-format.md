@@ -97,7 +97,12 @@ Used by `when` on events, choices and endings. An array means "all of these".
 
 - A number adds to the stat; `[lo, hi]` adds a random whole amount in that range.
 - `flag` / `unflag` set or clear one flag or a list of flags.
-- Keys that aren't stats or `flag`/`unflag` are ignored at runtime but rejected by the validator.
+- Keys that aren't stats or `flag`/`unflag` are ignored at runtime but rejected by the validator
+  (this includes `perTurnEffect`).
+- The validator also rejects values that aren't a number or a `[lo, hi]` pair of numbers
+  (`"3"`, `[5]`, `null`…), and `flag` / `unflag` values that aren't flag names. At runtime
+  those would turn the stat into `NaN` or a string. A reversed range like `[5, 1]` still
+  works the same as `[1, 5]`, but `packWarnings()` points it out.
 
 `packWarnings()` also lists flags that are checked but never set (usually a typo) and
 flags that are set but never checked.

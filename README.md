@@ -23,7 +23,7 @@
   - 可重复事件（`once: false`），可加 `cooldown: n` 让它出现后隔 n 回合再来
   - 事件可带 `onEnter` 效果：事件一出现就生效（在玩家选择之前），比如下雨先淋湿两个饭团；可加 `onEnterChance` 让它只按概率生效；读档不会重复生效
   - 带种子的随机数，状态存在存档里，读档后随机序列也接得上
-  - `validatePack()` 会抓拼错的数值名、重复 id、缺兜底结局；`packWarnings()` 提醒 `turns` / `fixed` 超出回合数、永远不会出现的事件（模拟器开头会打印）
+  - `validatePack()` 会抓拼错的数值名、重复 id、缺兜底结局、写错的效果值（如 `"3"`、`[5]`，否则运行时数值会变成 NaN 或字符串）；`packWarnings()` 提醒 `turns` / `fixed` 超出回合数、永远不会出现的事件（模拟器开头会打印）
 - `tools/simulate.mjs` 批量模拟：让几种机器人各玩一千局，看结局分布、数值中位数、哪些事件从来没出现过，以及每个 `onEnter` 触发了几次、实际（截断后）平均改了多少
 - `packs/first-job/`（入职半年）和 `packs/night-market/`（夜市五晚）两个示例剧本（中英双语），证明剧本可以随便换
 - `index.html` + `demo/` 可玩的网页，直接放 GitHub Pages；用 `?pack=night-market` 切换剧本（[直接玩](https://jasonin2099.github.io/lifesim-kit/?pack=night-market)），标题页也有切换链接

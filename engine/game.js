@@ -141,14 +141,36 @@ export function validatePack(pack) {
     if (e.cooldown !== undefined && !(Number.isInteger(e.cooldown) && e.cooldown >= 0)) errs.push(`${e.id}: cooldown must be a whole number >= 0`);
     for (const k of Object.keys(e.onEnter ?? {}))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: onEnter: unknown stat "${k}"`);
+    effectErrors(e.onEnter, `${e.id}: onEnter`, errs);
     if (e.onEnterChance !== undefined && !(typeof e.onEnterChance === 'number' && e.onEnterChance >= 0 && e.onEnterChance <= 1))
       errs.push(`${e.id}: onEnterChance must be a number from 0 to 1`);
     for (const c of e.choices ?? []) for (const k of Object.keys({ ...c.effect, ...c.success?.effect, ...c.failure?.effect }))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: unknown stat "${k}"`);
+    for (const [i, c] of (e.choices ?? []).entries())
+      for (const [where, eff] of [['effect', c.effect], ['success', c.success?.effect], ['failure', c.failure?.effect]])
+        effectErrors(eff, `${e.id}: choice ${i + 1} ${where}`, errs);
   }
+  for (const k of Object.keys(pack.perTurnEffect ?? {}))
+    if (!['flag', 'unflag'].includes(k) && !(k in (pack.stats ?? {}))) errs.push(`perTurnEffect: unknown stat "${k}"`);
+  effectErrors(pack.perTurnEffect, 'perTurnEffect', errs);
   if (!pack.endings?.some((e) => !e.when)) errs.push('need one fallback ending without `when`');
   if (errs.length) throw new Error('invalid pack:\n  ' + errs.join('\n  '));
   return true;
+}
+
+// Effect values: a stat change is a number or a [lo, hi] pair of numbers; flag / unflag is a
+// name or a list of names. Anything else silently turns a stat into NaN or a string at runtime.
+function effectErrors(effect, where, errs) {
+  if (effect === undefined) return;
+  if (!effect || typeof effect !== 'object' || Array.isArray(effect)) return errs.push(`${where}: effect must be an object`);
+  const num = (x) => typeof x === 'number' && Number.isFinite(x);
+  for (const [k, v] of Object.entries(effect)) {
+    if (k === 'flag' || k === 'unflag') {
+      if (![].concat(v).every((f) => typeof f === 'string' && f)) errs.push(`${where}: ${k} must be a flag name or a list of names`);
+    } else if (!(num(v) || (Array.isArray(v) && v.length === 2 && v.every(num)))) {
+      errs.push(`${where}: "${k}" must be a number or [lo, hi], got ${JSON.stringify(v)}`);
+    }
+  }
 }
 
 /** Non-fatal problems: things that load fine but probably aren't what the author meant. */
@@ -168,6 +190,13 @@ export function packWarnings(pack) {
     if (e.cooldown > 0 && e.fixed) warns.push(`${e.id}: cooldown has no effect on a fixed event`);
     if (e.onEnterChance !== undefined && !e.onEnter) warns.push(`${e.id}: onEnterChance has no effect without onEnter`);
     else if (e.onEnterChance === 0) warns.push(`${e.id}: onEnterChance is 0, the onEnter never applies`);
+  }
+  const ranges = (eff, where) => { for (const [k, v] of Object.entries(eff ?? {}))
+    if (Array.isArray(v) && v.length === 2 && v[0] > v[1]) warns.push(`${where}: "${k}" range [${v[0]}, ${v[1]}] is reversed (still works, but write [${v[1]}, ${v[0]}])`); };
+  ranges(pack.perTurnEffect, 'perTurnEffect');
+  for (const e of pack.events ?? []) {
+    ranges(e.onEnter, `${e.id}: onEnter`);
+    for (const c of e.choices ?? []) for (const eff of [c.effect, c.success?.effect, c.failure?.effect]) ranges(eff, e.id);
   }
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
