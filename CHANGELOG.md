@@ -11,6 +11,13 @@
   (`npm run simulate -- --n 2000`), since their `onEnter` effects never reach a game-over.
 
 ### Added
+- Validator: `when` conditions on events, choices and endings are checked when the pack
+  loads — unknown condition keys, two kinds in one object, unknown stats, `seen` ids that
+  aren't events, `{ "turn": 3 }` (always true before) and non-number `min` / `max`. Before,
+  an unknown key threw only when the condition was first reached, and a typo in a stat or
+  `seen` id never threw at all. Choice `chance` must be a number from 0 to 1, and
+  `packWarnings()` flags `success` / `failure` on a choice without `chance`. Both bundled
+  packs pass with no new warnings and identical simulator output.
 - Validator: effect values must be a number or a `[lo, hi]` pair of numbers, and `flag` /
   `unflag` must be flag names (in choice effects, `success` / `failure`, `onEnter` and
   `perTurnEffect`). Before, `"3"` or `[5]` loaded fine and then turned the stat into a

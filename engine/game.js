@@ -146,10 +146,19 @@ export function validatePack(pack) {
       errs.push(`${e.id}: onEnterChance must be a number from 0 to 1`);
     for (const c of e.choices ?? []) for (const k of Object.keys({ ...c.effect, ...c.success?.effect, ...c.failure?.effect }))
       if (!['flag', 'unflag'].includes(k) && !(k in pack.stats)) errs.push(`${e.id}: unknown stat "${k}"`);
-    for (const [i, c] of (e.choices ?? []).entries())
+    for (const [i, c] of (e.choices ?? []).entries()) {
       for (const [where, eff] of [['effect', c.effect], ['success', c.success?.effect], ['failure', c.failure?.effect]])
         effectErrors(eff, `${e.id}: choice ${i + 1} ${where}`, errs);
+      if (c.chance !== undefined && !(typeof c.chance === 'number' && c.chance >= 0 && c.chance <= 1))
+        errs.push(`${e.id}: choice ${i + 1} chance must be a number from 0 to 1`);
+    }
   }
+  // conditions: checked after all events are known, so `seen` can point at any event id
+  for (const e of pack.events ?? []) {
+    conditionErrors(e.when, `${e.id}: when`, pack, ids, errs);
+    for (const [i, c] of (e.choices ?? []).entries()) conditionErrors(c.when, `${e.id}: choice ${i + 1} when`, pack, ids, errs);
+  }
+  for (const [i, e] of (pack.endings ?? []).entries()) conditionErrors(e.when, `ending ${e.id ?? i + 1}: when`, pack, ids, errs);
   for (const k of Object.keys(pack.perTurnEffect ?? {}))
     if (!['flag', 'unflag'].includes(k) && !(k in (pack.stats ?? {}))) errs.push(`perTurnEffect: unknown stat "${k}"`);
   effectErrors(pack.perTurnEffect, 'perTurnEffect', errs);
@@ -173,6 +182,44 @@ function effectErrors(effect, where, errs) {
   }
 }
 
+// Conditions (see conditions.js). At runtime an unknown key throws only when that condition is
+// first checked, possibly many turns in; a misspelled stat or `seen` id, or `turn: 3` instead of
+// `turn: { min: 3 }`, never throws and just quietly never (or always) passes.
+const CONDITION_KEYS = { all: [], any: [], not: [], stat: ['min', 'max'], flag: ['eq'], turn: [], seen: [] };
+function conditionErrors(c, where, pack, eventIds, errs) {
+  if (c === undefined || c === null) return;
+  if (Array.isArray(c)) return c.forEach((x, i) => conditionErrors(x, `${where}[${i}]`, pack, eventIds, errs));
+  if (typeof c !== 'object') return errs.push(`${where}: condition must be an object or a list, got ${JSON.stringify(c)}`);
+  const kinds = Object.keys(c).filter((k) => k in CONDITION_KEYS);
+  if (kinds.length !== 1) {
+    return errs.push(kinds.length ? `${where}: one condition per object, got ${kinds.join(' + ')} (wrap them in "all": […])`
+      : `${where}: unknown condition ${JSON.stringify(c)} (use stat, flag, turn, seen, all, any or not)`);
+  }
+  const [kind] = kinds;
+  for (const k of Object.keys(c)) if (k !== kind && !CONDITION_KEYS[kind].includes(k)) errs.push(`${where}: "${k}" does nothing in a ${kind} condition`);
+  const num = (x) => x === undefined || (typeof x === 'number' && Number.isFinite(x));
+  const v = c[kind];
+  if (kind === 'all' || kind === 'any') {
+    if (!Array.isArray(v)) return errs.push(`${where}: ${kind} must be a list of conditions`);
+    v.forEach((x, i) => conditionErrors(x, `${where}.${kind}[${i}]`, pack, eventIds, errs));
+  } else if (kind === 'not') {
+    if (!v || typeof v !== 'object') return errs.push(`${where}: not must be a condition`);
+    conditionErrors(v, `${where}.not`, pack, eventIds, errs);
+  } else if (kind === 'stat') {
+    if (!(typeof v === 'string' && v in (pack.stats ?? {}))) errs.push(`${where}: unknown stat ${JSON.stringify(v)}`);
+    if (!num(c.min) || !num(c.max)) errs.push(`${where}: min / max must be numbers`);
+  } else if (kind === 'flag') {
+    if (!(typeof v === 'string' && v)) errs.push(`${where}: flag must be a flag name`);
+    if (c.eq !== undefined && typeof c.eq !== 'boolean') errs.push(`${where}: eq must be true or false`);
+  } else if (kind === 'turn') {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return errs.push(`${where}: turn must be { "min": …, "max": … }, got ${JSON.stringify(v)}`);
+    for (const k of Object.keys(v)) if (k !== 'min' && k !== 'max') errs.push(`${where}: "${k}" does nothing in a turn condition`);
+    if (!num(v.min) || !num(v.max)) errs.push(`${where}: turn min / max must be numbers`);
+  } else if (kind === 'seen') {
+    if (!eventIds.has(v)) errs.push(`${where}: seen: unknown event ${JSON.stringify(v)}`);
+  }
+}
+
 /** Non-fatal problems: things that load fine but probably aren't what the author meant. */
 export function packWarnings(pack) {
   const warns = [];
@@ -188,6 +235,8 @@ export function packWarnings(pack) {
       warns.push(`${e.id}: fixed turn ${e.fixed} is outside 1..${T}, the event can never appear`);
     if (e.cooldown > 0 && e.once !== false) warns.push(`${e.id}: cooldown has no effect unless once is false`);
     if (e.cooldown > 0 && e.fixed) warns.push(`${e.id}: cooldown has no effect on a fixed event`);
+    for (const [i, c] of (e.choices ?? []).entries())
+      if (c.chance === undefined && (c.success || c.failure)) warns.push(`${e.id}: choice ${i + 1} has success / failure but no chance, so they are never used`);
     if (e.onEnterChance !== undefined && !e.onEnter) warns.push(`${e.id}: onEnterChance has no effect without onEnter`);
     else if (e.onEnterChance === 0) warns.push(`${e.id}: onEnterChance is 0, the onEnter never applies`);
   }

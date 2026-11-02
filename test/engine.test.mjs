@@ -377,3 +377,61 @@ test('rng: next() is seeded, in [0, 1), and pickWeighted respects weights', () =
   assert.equal(pickWeighted({ rng: 1 }, [{ weight: 0 }, { weight: -1 }]), null);
   assert.equal(pickWeighted({ rng: 1 }, []), null);
 });
+
+test('conditions are validated up front: unknown keys, stats, seen ids, malformed turn / flag', () => {
+  const p = {
+    id: 'cond', turns: 3, perTurn: 1, stats: { m: { initial: 50, min: 0, max: 100 } },
+    events: [
+      { id: 'a', when: { all: [{ stat: 'm', min: 10 }, { turn: { min: 1, max: 3 } }] }, choices: [{ label: 'x', effect: { flag: 'f' } }] },
+      { id: 'b', when: [{ seen: 'a' }, { not: { flag: 'f', eq: false } }], choices: [{ label: 'y', when: { any: [{ flag: 'f' }, { stat: 'm', max: 90 }] } }] },
+    ],
+    endings: [{ id: 'win', when: { stat: 'm', min: 60 } }, { id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const withWhen = (where, when) => {
+    const q = structuredClone(p);
+    if (where === 'event') q.events[1].when = when;
+    else if (where === 'choice') q.events[1].choices[0].when = when;
+    else q.endings[0].when = when;
+    return q;
+  };
+  const bad = [
+    [{ stat: 'mm', min: 1 }, /unknown stat "mm"/],
+    [{ stats: 'm' }, /unknown condition/],
+    [{ flag: 'f', stat: 'm' }, /one condition per object, got flag \+ stat/],
+    [{ stat: 'm', min: '5' }, /min \/ max must be numbers/],
+    [{ stat: 'm', minimum: 5 }, /"minimum" does nothing in a stat condition/],
+    [{ flag: '' }, /flag must be a flag name/],
+    [{ flag: 'f', eq: 'false' }, /eq must be true or false/],
+    [{ turn: 3 }, /turn must be \{ "min"/],
+    [{ turn: { from: 2 } }, /"from" does nothing in a turn condition/],
+    [{ seen: 'nope' }, /seen: unknown event "nope"/],
+    [{ all: { stat: 'm' } }, /all must be a list/],
+    [{ any: [{ flag: 'f' }, { stat: 'x' }] }, /\.any\[1\]: unknown stat "x"/],
+    [{ not: { seen: 'zz' } }, /\.not: seen: unknown event "zz"/],
+    [['f'], /\[0\]: condition must be an object/],
+  ];
+  for (const where of ['event', 'choice', 'ending'])
+    for (const [when, re] of bad) assert.throws(() => validatePack(withWhen(where, when)), re, `${where} ${JSON.stringify(when)}`);
+  assert.throws(() => validatePack(withWhen('ending', { seen: 'nope' })), /ending win: when: seen: unknown event/);
+});
+
+test('choice chance must be 0..1; success / failure without chance is a warning', () => {
+  const p = {
+    id: 'ch', turns: 1, perTurn: 1, stats: { m: { initial: 5 } },
+    events: [{ id: 'e', choices: [{ label: 'a', chance: 0.5, success: { effect: { m: 1 } } }, { label: 'b', chance: 0 }, { label: 'c', chance: 1 }] }],
+    endings: [{ id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  for (const chance of [-0.1, 1.5, '0.5', null, NaN, 50]) {
+    const q = structuredClone(p);
+    q.events[0].choices[0].chance = chance;
+    assert.throws(() => validatePack(q), /e: choice 1 chance must be a number from 0 to 1/, JSON.stringify(chance));
+  }
+  const q = structuredClone(p);
+  delete q.events[0].choices[0].chance;
+  assert.ok(validatePack(q));
+  assert.match(packWarnings(q).join('\n'), /e: choice 1 has success \/ failure but no chance/);
+});
