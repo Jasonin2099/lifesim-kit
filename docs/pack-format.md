@@ -62,8 +62,8 @@ skipped.
 | `when` | Condition; the choice is hidden when it fails. |
 | `effect` | [Effect](#effects) applied when chosen. Stat keys must exist in `stats` (**typos are errors**). |
 | `result` | Text shown after choosing. |
-| `chance` | `0..1`. Rolls the seeded RNG: below `chance` uses `success`, otherwise `failure`. |
-| `success`, `failure` | `{ "effect": …, "result": … }` used instead of the choice's own when `chance` is set. A missing `failure` means nothing happens. |
+| `chance` | `0..1` (**anything else is an error**). Rolls the seeded RNG: below `chance` uses `success`, otherwise `failure`. |
+| `success`, `failure` | `{ "effect": …, "result": … }` used instead of the choice's own when `chance` is set. A missing `failure` means nothing happens. Without `chance` they are never used (`packWarnings()` says so). |
 
 ## `endings`
 
@@ -87,7 +87,15 @@ Used by `when` on events, choices and endings. An array means "all of these".
 { "all": [ … ] }   { "any": [ … ] }   { "not": { … } }
 ```
 
-`min` and `max` are inclusive and both optional. An unknown condition throws.
+`min` and `max` are inclusive and both optional. Each object holds exactly one kind of
+condition; to combine two, put them in `all` (or in an array).
+
+`validatePack()` checks every condition up front (**errors**): unknown keys (`{ "stats": … }`),
+two kinds in one object (`{ "stat": "m", "flag": "f" }` would silently ignore the flag),
+stats that don't exist, `seen` ids that aren't events in the pack, `turn` written as a number
+(`{ "turn": 3 }` would always pass — use `{ "turn": { "min": 3, "max": 3 } }`), non-number
+`min` / `max`, an `eq` that isn't `true` / `false`, and `all` / `any` that aren't lists. At
+runtime an unknown condition still throws, but only when it is first reached.
 
 ## Effects
 
