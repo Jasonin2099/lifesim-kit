@@ -16,6 +16,7 @@ Small steps, roughly one per day.
 - [x] Validator: warn on events whose `turns` range is outside `1..turns`
 - [x] Validator: warn on flags that are checked but never set (and vice versa)
 - [x] Validator: check `when` conditions and choice `chance` when the pack loads
+- [x] Validator: warn on stat conditions that can never be true and `{stat:…}` placeholders with unknown stats
 - [x] Demo: keyboard shortcuts (1–9 to choose, Enter to start)
 - [x] Demo: run log / timeline on the ending screen
 - [ ] Demo: Japanese text for the sample pack
