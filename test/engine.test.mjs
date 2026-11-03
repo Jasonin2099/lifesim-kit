@@ -435,3 +435,36 @@ test('choice chance must be 0..1; success / failure without chance is a warning'
   assert.ok(validatePack(q));
   assert.match(packWarnings(q).join('\n'), /e: choice 1 has success \/ failure but no chance/);
 });
+
+test('packWarnings: stat conditions that can never be true, and {stat:…} placeholders with unknown stats', () => {
+  const p = {
+    id: 'imp', turns: 2, perTurn: 1, stats: { m: { initial: 50, min: 0, max: 100 }, free: { initial: 0 } },
+    events: [
+      { id: 'e', when: { stat: 'm', min: 100 }, text: { zh: '还剩 {stat:m}', en: '{stat:m} left' },
+        choices: [{ label: 'a {stat:free}', when: { stat: 'free', min: 1e9 }, result: 'ok' }] },
+    ],
+    endings: [{ id: 'low', when: { stat: 'm', max: 0 }, text: 'Turn {turn}: {stat:m}' }, { id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const q = structuredClone(p);
+  q.events[0].when = { all: [{ stat: 'm', min: 200 }, { not: { stat: 'm', min: 60, max: 40 } }] };
+  q.events[0].choices[0].when = [{ any: [{ stat: 'm', max: -1 }] }];
+  q.endings[0].when = { stat: 'm', min: 101, max: 300 };
+  q.events[0].text = { zh: '还剩 {stat:mm}', en: '{stat:mm} left' };
+  q.events[0].choices[0].success = { result: 'got {stat:money}' };
+  q.events[0].choices[0].chance = 0.5;
+  q.endings[0].title = '{stat:m}{stat:energy}';
+  assert.ok(validatePack(q));
+  const w = packWarnings(q);
+  for (const re of [
+    /^e: when\.all\[0\]: stat "m" condition can never be true \(min 200 is above the stat's max 100\)$/,
+    /^e: when\.all\[1\]\.not: stat "m" condition can never be true \(min 60 > max 40\)$/,
+    /^e: choice 1 when\[0\]\.any\[0\]: stat "m" condition can never be true \(max -1 is below the stat's min 0\)$/,
+    /^ending low: when: stat "m" condition can never be true \(min 101 is above/,
+    /^e: text: \{stat:mm\} is not a stat/,
+    /^e: choice 1 success result: \{stat:money\} is not a stat/,
+    /^ending low: title: \{stat:energy\} is not a stat/,
+  ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
+  assert.equal(w.length, 7, w.join('\n'));
+});

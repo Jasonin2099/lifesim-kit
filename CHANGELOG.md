@@ -11,6 +11,11 @@
   (`npm run simulate -- --n 2000`), since their `onEnter` effects never reach a game-over.
 
 ### Added
+- `packWarnings()` flags `stat` conditions that can never be true: `min` greater than `max`,
+  or a range entirely outside the stat's own `min` / `max` (stats are clamped, so
+  `{ "stat": "m", "min": 200 }` on a 0..100 stat never passes). It also flags `{stat:…}`
+  placeholders in event / ending / choice text whose stat doesn't exist, which `fill()` leaves
+  on screen as is. Both bundled packs: no warnings, simulator output byte-identical.
 - Validator: `when` conditions on events, choices and endings are checked when the pack
   loads — unknown condition keys, two kinds in one object, unknown stats, `seen` ids that
   aren't events, `{ "turn": 3 }` (always true before) and non-number `min` / `max`. Before,

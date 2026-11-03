@@ -247,6 +247,8 @@ export function packWarnings(pack) {
     ranges(e.onEnter, `${e.id}: onEnter`);
     for (const c of e.choices ?? []) for (const eff of [c.effect, c.success?.effect, c.failure?.effect]) ranges(eff, e.id);
   }
+  impossibleConditions(pack, warns);
+  unknownStatPlaceholders(pack, warns);
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
   for (const f of set) if (!checked.has(f)) warns.push(`flag "${f}" is set but never checked`);
@@ -271,4 +273,56 @@ function flagUse(pack) {
   }
   for (const e of pack.endings ?? []) walk(e.when);
   return { checked, set };
+}
+
+// Stat conditions that can never be true: min > max, or a range that lies entirely outside the
+// stat's own min..max (stats are clamped, so `min: 200` on a 0..100 stat never passes).
+function impossibleConditions(pack, warns) {
+  const walk = (c, where) => {
+    if (!c || typeof c !== 'object') return;
+    if (Array.isArray(c)) return c.forEach((x, i) => walk(x, `${where}[${i}]`));
+    if (Array.isArray(c.all)) c.all.forEach((x, i) => walk(x, `${where}.all[${i}]`));
+    if (Array.isArray(c.any)) c.any.forEach((x, i) => walk(x, `${where}.any[${i}]`));
+    if (c.not) walk(c.not, `${where}.not`);
+    const d = typeof c.stat === 'string' ? pack.stats?.[c.stat] : undefined;
+    if (!d) return;
+    const { min, max } = c, lo = d.min ?? -Infinity, hi = d.max ?? Infinity;
+    const never = `${where}: stat "${c.stat}" condition can never be true`;
+    if (typeof min === 'number' && typeof max === 'number' && min > max) warns.push(`${never} (min ${min} > max ${max})`);
+    else if (typeof min === 'number' && min > hi) warns.push(`${never} (min ${min} is above the stat's max ${hi})`);
+    else if (typeof max === 'number' && max < lo) warns.push(`${never} (max ${max} is below the stat's min ${lo})`);
+  };
+  for (const e of pack.events ?? []) {
+    walk(e.when, `${e.id}: when`);
+    for (const [i, c] of (e.choices ?? []).entries()) walk(c.when, `${e.id}: choice ${i + 1} when`);
+  }
+  for (const [i, e] of (pack.endings ?? []).entries()) walk(e.when, `ending ${e.id ?? i + 1}: when`);
+}
+
+// `{stat:x}` with a stat the pack doesn't have is left as it is by fill(), so the raw
+// placeholder ends up on screen. Looks at the text the demo fills in (event / ending title and
+// text, choice label and results), plain or per language.
+function unknownStatPlaceholders(pack, warns) {
+  const scan = (text, where) => {
+    const strings = typeof text === 'string' ? [text] : text && typeof text === 'object' ? Object.values(text) : [];
+    const bad = new Set(); // zh and en usually share the same typo: report it once
+    for (const s of strings) if (typeof s === 'string')
+      for (const [, key] of s.matchAll(/\{stat:([\w-]+)(?:\?[^|}]*\|[^}]*)?\}/g))
+        if (!(key in (pack.stats ?? {}))) bad.add(key);
+    for (const key of bad) warns.push(`${where}: {stat:${key}} is not a stat, it will show up as is`);
+  };
+  for (const e of pack.events ?? []) {
+    scan(e.title, `${e.id}: title`);
+    scan(e.text, `${e.id}: text`);
+    for (const [i, c] of (e.choices ?? []).entries()) {
+      scan(c.label, `${e.id}: choice ${i + 1} label`);
+      scan(c.result, `${e.id}: choice ${i + 1} result`);
+      scan(c.success?.result, `${e.id}: choice ${i + 1} success result`);
+      scan(c.failure?.result, `${e.id}: choice ${i + 1} failure result`);
+    }
+  }
+  for (const [i, e] of (pack.endings ?? []).entries()) {
+    scan(e.title, `ending ${e.id ?? i + 1}: title`);
+    scan(e.text, `ending ${e.id ?? i + 1}: text`);
+  }
 }
