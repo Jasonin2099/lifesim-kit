@@ -11,6 +11,11 @@
   (`npm run simulate -- --n 2000`), since their `onEnter` effects never reach a game-over.
 
 ### Added
+- `packWarnings()`: a `{flag:x?yes|no}` text placeholder now counts as checking the flag, so
+  a flag that is only shown in text no longer gets a false "set but never checked" warning
+  (and a placeholder whose flag is never set gets "checked but never set"). `{flag:…}`
+  placeholders without `?yes|no`, which `fill()` leaves on screen as is, are flagged too.
+  Both bundled packs: no warnings, simulator output byte-identical.
 - `packWarnings()` flags `stat` conditions that can never be true: `min` greater than `max`,
   or a range entirely outside the stat's own `min` / `max` (stats are clamped, so
   `{ "stat": "m", "min": 200 }` on a 0..100 stat never passes). It also flags `{stat:…}`

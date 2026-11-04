@@ -248,14 +248,15 @@ export function packWarnings(pack) {
     for (const c of e.choices ?? []) for (const eff of [c.effect, c.success?.effect, c.failure?.effect]) ranges(eff, e.id);
   }
   impossibleConditions(pack, warns);
-  unknownStatPlaceholders(pack, warns);
+  badPlaceholders(pack, warns);
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
   for (const f of set) if (!checked.has(f)) warns.push(`flag "${f}" is set but never checked`);
   return warns;
 }
 
-// Which flags conditions look at, and which effects set (unflag alone never makes a flag true).
+// Which flags conditions and `{flag:x?yes|no}` text placeholders look at, and which effects
+// set (unflag alone never makes a flag true).
 function flagUse(pack) {
   const checked = new Set(), set = new Set();
   const walk = (c) => {
@@ -272,6 +273,8 @@ function flagUse(pack) {
     for (const c of e.choices ?? []) { walk(c.when); eff(c.effect); eff(c.success?.effect); eff(c.failure?.effect); }
   }
   for (const e of pack.endings ?? []) walk(e.when);
+  eachText(pack, (strings) => { for (const s of strings)
+    for (const [, key] of s.matchAll(/\{flag:([\w-]+)\?[^|}]*\|[^}]*\}/g)) checked.add(key); });
   return { checked, set };
 }
 
@@ -299,17 +302,12 @@ function impossibleConditions(pack, warns) {
   for (const [i, e] of (pack.endings ?? []).entries()) walk(e.when, `ending ${e.id ?? i + 1}: when`);
 }
 
-// `{stat:x}` with a stat the pack doesn't have is left as it is by fill(), so the raw
-// placeholder ends up on screen. Looks at the text the demo fills in (event / ending title and
-// text, choice label and results), plain or per language.
-function unknownStatPlaceholders(pack, warns) {
+// Every piece of text the demo runs through fill(): event / ending title and text, choice label
+// and results. Calls fn(strings, where) with the plain string or the per-language values.
+function eachText(pack, fn) {
   const scan = (text, where) => {
     const strings = typeof text === 'string' ? [text] : text && typeof text === 'object' ? Object.values(text) : [];
-    const bad = new Set(); // zh and en usually share the same typo: report it once
-    for (const s of strings) if (typeof s === 'string')
-      for (const [, key] of s.matchAll(/\{stat:([\w-]+)(?:\?[^|}]*\|[^}]*)?\}/g))
-        if (!(key in (pack.stats ?? {}))) bad.add(key);
-    for (const key of bad) warns.push(`${where}: {stat:${key}} is not a stat, it will show up as is`);
+    fn(strings.filter((s) => typeof s === 'string'), where);
   };
   for (const e of pack.events ?? []) {
     scan(e.title, `${e.id}: title`);
@@ -325,4 +323,21 @@ function unknownStatPlaceholders(pack, warns) {
     scan(e.title, `ending ${e.id ?? i + 1}: title`);
     scan(e.text, `ending ${e.id ?? i + 1}: text`);
   }
+}
+
+// `{stat:x}` with a stat the pack doesn't have is left as it is by fill(), so the raw
+// placeholder ends up on screen. `{flag:x}` without `?yes|no` (or with only `?yes`) is left
+// as it is too.
+function badPlaceholders(pack, warns) {
+  eachText(pack, (strings, where) => {
+    const stats = new Set(), flags = new Set(); // zh and en usually share the same typo: report it once
+    for (const s of strings) {
+      for (const [, key] of s.matchAll(/\{stat:([\w-]+)(?:\?[^|}]*\|[^}]*)?\}/g))
+        if (!(key in (pack.stats ?? {}))) stats.add(key);
+      for (const [m, rest] of s.matchAll(/\{flag:[\w-]+([^}]*)\}/g))
+        if (!/^\?[^|}]*\|/.test(rest)) flags.add(m);
+    }
+    for (const key of stats) warns.push(`${where}: {stat:${key}} is not a stat, it will show up as is`);
+    for (const m of flags) warns.push(`${where}: ${m} needs ?yes|no (like {flag:x?yes|no}), it will show up as is`);
+  });
 }

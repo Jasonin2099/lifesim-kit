@@ -468,3 +468,28 @@ test('packWarnings: stat conditions that can never be true, and {stat:…} place
   ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
   assert.equal(w.length, 7, w.join('\n'));
 });
+
+test('packWarnings: {flag:x?yes|no} placeholders count as checks; {flag:x} without ?yes|no is flagged', () => {
+  const p = {
+    id: 'fp', turns: 2, perTurn: 1, stats: { m: { initial: 5 } },
+    events: [
+      { id: 'e', text: { zh: '{flag:promoted?升职了|还没}', en: '{flag:promoted?Promoted|Not yet}' },
+        choices: [{ label: 'go', effect: { flag: 'promoted' }, result: 'ok' }, { label: 'stay', effect: { flag: 'stayed' } }] },
+    ],
+    endings: [{ id: 'fallback', text: '{flag:stayed?|You left.}' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const q = structuredClone(p);
+  q.events[0].choices[1].result = 'Ghost? {flag:ghost?yes|no}';
+  q.endings[0].text = { zh: '{flag:stayed}', en: '{flag:stayed}' };
+  q.endings[0].title = '{flag:promoted?yes}';
+  const w = packWarnings(q);
+  for (const re of [
+    /^ending fallback: text: \{flag:stayed\} needs \?yes\|no/,
+    /^ending fallback: title: \{flag:promoted\?yes\} needs \?yes\|no/,
+    /^flag "ghost" is checked but never set$/,
+    /^flag "stayed" is set but never checked$/,
+  ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
+  assert.equal(w.length, 4, w.join('\n'));
+});
