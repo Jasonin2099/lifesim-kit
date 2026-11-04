@@ -118,7 +118,7 @@ on a `0..100` stat, or a `max` below the stat's `min`. Inside `not` such a condi
   works the same as `[1, 5]`, but `packWarnings()` points it out.
 
 `packWarnings()` also lists flags that are checked but never set (usually a typo) and
-flags that are set but never checked.
+flags that are set but never checked. A `{flag:x?yes|no}` text placeholder counts as a check.
 
 ## Text placeholders
 
@@ -131,5 +131,6 @@ Filled in by `fill()` from `engine/text.js`, using the current run:
 | `{flag:promoted?yes|no}` | `yes` if the flag is set, otherwise `no` (either side may be empty) |
 
 Anything else, including a misspelled stat, is left as it is so it shows up on screen.
-`packWarnings()` lists `{stat:…}` placeholders whose stat doesn't exist, in event and ending
+`packWarnings()` lists `{stat:…}` placeholders whose stat doesn't exist, and `{flag:…}`
+placeholders without the `?yes|no` part (`{flag:x}`, `{flag:x?yes}`), in event and ending
 titles and text, choice labels and results (`success` / `failure` too).
