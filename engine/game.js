@@ -278,9 +278,12 @@ function flagUse(pack) {
   return { checked, set };
 }
 
-// Stat conditions that can never be true: min > max, or a range that lies entirely outside the
-// stat's own min..max (stats are clamped, so `min: 200` on a 0..100 stat never passes).
+// Conditions that can never be true: a stat range with min > max or entirely outside the
+// stat's own min..max (stats are clamped, so `min: 200` on a 0..100 stat never passes); a
+// turn range with min > max or entirely outside 1..pack.turns. A soft "goes past" warning
+// mirrors the existing event `turns` warning when the range overlaps but sticks out.
 function impossibleConditions(pack, warns) {
+  const T = pack.turns;
   const walk = (c, where) => {
     if (!c || typeof c !== 'object') return;
     if (Array.isArray(c)) return c.forEach((x, i) => walk(x, `${where}[${i}]`));
@@ -288,12 +291,22 @@ function impossibleConditions(pack, warns) {
     if (Array.isArray(c.any)) c.any.forEach((x, i) => walk(x, `${where}.any[${i}]`));
     if (c.not) walk(c.not, `${where}.not`);
     const d = typeof c.stat === 'string' ? pack.stats?.[c.stat] : undefined;
-    if (!d) return;
-    const { min, max } = c, lo = d.min ?? -Infinity, hi = d.max ?? Infinity;
-    const never = `${where}: stat "${c.stat}" condition can never be true`;
-    if (typeof min === 'number' && typeof max === 'number' && min > max) warns.push(`${never} (min ${min} > max ${max})`);
-    else if (typeof min === 'number' && min > hi) warns.push(`${never} (min ${min} is above the stat's max ${hi})`);
-    else if (typeof max === 'number' && max < lo) warns.push(`${never} (max ${max} is below the stat's min ${lo})`);
+    if (d) {
+      const { min, max } = c, lo = d.min ?? -Infinity, hi = d.max ?? Infinity;
+      const never = `${where}: stat "${c.stat}" condition can never be true`;
+      if (typeof min === 'number' && typeof max === 'number' && min > max) warns.push(`${never} (min ${min} > max ${max})`);
+      else if (typeof min === 'number' && min > hi) warns.push(`${never} (min ${min} is above the stat's max ${hi})`);
+      else if (typeof max === 'number' && max < lo) warns.push(`${never} (max ${max} is below the stat's min ${lo})`);
+    }
+    if (c.turn && typeof c.turn === 'object' && !Array.isArray(c.turn)) {
+      const { min, max } = c.turn;
+      const never = `${where}: turn condition can never be true`;
+      if (typeof min === 'number' && typeof max === 'number' && min > max) warns.push(`${never} (min ${min} > max ${max})`);
+      else if (typeof min === 'number' && min > T) warns.push(`${never} (min ${min} is above the pack's ${T} turns)`);
+      else if (typeof max === 'number' && max < 1) warns.push(`${never} (max ${max} is below 1)`);
+      else if ((typeof min === 'number' && min < 1) || (typeof max === 'number' && max > T))
+        warns.push(`${where}: turn condition goes past 1..${T}`);
+    }
   };
   for (const e of pack.events ?? []) {
     walk(e.when, `${e.id}: when`);

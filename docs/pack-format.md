@@ -97,10 +97,13 @@ stats that don't exist, `seen` ids that aren't events in the pack, `turn` writte
 `min` / `max`, an `eq` that isn't `true` / `false`, and `all` / `any` that aren't lists. At
 runtime an unknown condition still throws, but only when it is first reached.
 
-`packWarnings()` also flags `stat` conditions that can never be true, because stats are
-clamped to their own `min` / `max`: `min` greater than `max`, `{ "stat": "energy", "min": 200 }`
-on a `0..100` stat, or a `max` below the stat's `min`. Inside `not` such a condition makes the
-`not` always true, which is just as likely a mistake.
+`packWarnings()` also flags `stat` and `turn` conditions that can never be true: for stats,
+because they are clamped to their own `min` / `max` (`min` greater than `max`,
+`{ "stat": "energy", "min": 200 }` on a `0..100` stat, or a `max` below the stat's `min`); for
+turns, `min` greater than `max`, a `min` above the pack's `turns`, or a `max` below 1. A turn
+range that overlaps `1..turns` but sticks out gets a softer "goes past" warning (same idea as
+the event `turns` field). Inside `not` such a condition makes the `not` always true, which is
+just as likely a mistake.
 
 ## Effects
 
