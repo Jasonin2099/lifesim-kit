@@ -493,3 +493,33 @@ test('packWarnings: {flag:x?yes|no} placeholders count as checks; {flag:x} witho
   ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
   assert.equal(w.length, 4, w.join('\n'));
 });
+
+test('packWarnings: turn conditions that can never be true / outside 1..turns', () => {
+  const p = {
+    id: 'turn-imp', turns: 5, perTurn: 1, stats: { m: { initial: 5 } },
+    events: [
+      { id: 'e', when: { turn: { min: 2, max: 4 } },
+        choices: [{ label: 'a', when: { turn: { min: 1 } }, result: 'ok' }] },
+    ],
+    endings: [{ id: 'late', when: { turn: { min: 5 } } }, { id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const q = structuredClone(p);
+  q.events[0].when = { all: [{ turn: { min: 9 } }, { not: { turn: { min: 4, max: 2 } } }] };
+  q.events[0].choices[0].when = [{ any: [{ turn: { max: 0 } }] }];
+  q.endings[0].when = { turn: { min: 0, max: 3 } }; // overlaps but sticks out below 1
+  const soft = structuredClone(p);
+  soft.events[0].when = { turn: { min: 2, max: 9 } }; // overlaps but sticks out above T
+  assert.ok(validatePack(q));
+  assert.ok(validatePack(soft));
+  const w = packWarnings(q);
+  for (const re of [
+    /^e: when\.all\[0\]: turn condition can never be true \(min 9 is above the pack's 5 turns\)$/,
+    /^e: when\.all\[1\]\.not: turn condition can never be true \(min 4 > max 2\)$/,
+    /^e: choice 1 when\[0\]\.any\[0\]: turn condition can never be true \(max 0 is below 1\)$/,
+    /^ending late: when: turn condition goes past 1\.\.5$/,
+  ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
+  assert.equal(w.length, 4, w.join('\n'));
+  assert.match(packWarnings(soft).join('\n'), /^e: when: turn condition goes past 1\.\.5$/m);
+});
