@@ -1,6 +1,6 @@
 {
   "name": "lifesim-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tiny data-driven life-sim engine: JSON events, seeded RNG, save/load, and a batch balance simulator. Zero dependencies.",
   "type": "module",
   "license": "MIT",
@@ -9,5 +9,12 @@
     "simulate": "node tools/simulate.mjs",
     "serve": "python3 -m http.server 8000"
   },
-  "keywords": ["game-engine", "life-simulator", "text-game", "interactive-fiction", "json", "simulation"]
+  "keywords": [
+    "game-engine",
+    "life-simulator",
+    "text-game",
+    "interactive-fiction",
+    "json",
+    "simulation"
+  ]
 }

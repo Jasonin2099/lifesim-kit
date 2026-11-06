@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 — 2026-11-06
+
 ### Changed (behaviour)
 - Immediate endings are now also checked right after an event's `onEnter`. If the
   `onEnter` already meets an `immediate` ending, the run ends at once: no choices are shown,
