@@ -125,7 +125,8 @@ flags that are set but never checked. A `{flag:x?yes|no}` text placeholder count
 
 ## Text placeholders
 
-Filled in by `fill()` from `engine/text.js`, using the current run:
+Filled in by `fill()` from `engine/text.js`, using the current run — **only** in event /
+ending title and text, and choice labels / results (`success` / `failure` too):
 
 | placeholder | becomes |
 |---|---|
@@ -135,5 +136,9 @@ Filled in by `fill()` from `engine/text.js`, using the current run:
 
 Anything else, including a misspelled stat, is left as it is so it shows up on screen.
 `packWarnings()` lists `{stat:…}` placeholders whose stat doesn't exist, and `{flag:…}`
-placeholders without the `?yes|no` part (`{flag:x}`, `{flag:x?yes}`), in event and ending
-titles and text, choice labels and results (`success` / `failure` too).
+placeholders without the `?yes|no` part (`{flag:x}`, `{flag:x?yes}`), in those same fields.
+
+Pack-level `title` and `intro` are shown raw (i18n only — no `fill()`). `turnLabel` only
+substitutes `{n}` with the turn number. `packWarnings()` flags fill-style placeholders
+(`{stat:…}`, `{flag:…}`, `{turn}` / `{turns}`) in those three fields so they don't sit on
+screen unnoticed; `{n}` in `turnLabel` is intentional and is not warned.

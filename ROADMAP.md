@@ -21,6 +21,7 @@ Small steps, roughly one per day.
 - [x] Demo: run log / timeline on the ending screen
 - [x] Validator: `{flag:x?yes|no}` placeholders count as flag checks; warn on `{flag:x}` without `?yes|no`
 - [x] Validator: warn on turn conditions that can never be true / go past `1..turns`
+- [x] Validator: warn on fill-style placeholders in pack `title` / `intro` / `turnLabel`
 - [ ] Demo: Japanese text for the sample pack
 - [x] Docs: `docs/pack-format.md` with every field
 - [x] Second tiny sample pack to prove packs are swappable (`?pack=` URL param)

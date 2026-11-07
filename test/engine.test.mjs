@@ -523,3 +523,34 @@ test('packWarnings: turn conditions that can never be true / outside 1..turns', 
   assert.equal(w.length, 4, w.join('\n'));
   assert.match(packWarnings(soft).join('\n'), /^e: when: turn condition goes past 1\.\.5$/m);
 });
+
+test('packWarnings: fill-style placeholders in pack title / intro / turnLabel', () => {
+  const p = {
+    id: 'meta', turns: 2, perTurn: 1, stats: { m: { initial: 5 } },
+    title: { zh: '月薪模拟', en: 'Paycheck' },
+    intro: 'A short run.',
+    turnLabel: { zh: '第 {n} 月', en: 'Month {n}' },
+    events: [{ id: 'e', text: 'ok {stat:m}', choices: [{ label: 'go', result: 'done' }] }],
+    endings: [{ id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  assert.deepEqual(packWarnings(p), []);
+  const q = structuredClone(p);
+  q.title = { zh: '还剩 {stat:m}', en: '{stat:m} left · {flag:done?yes|no}' };
+  q.intro = 'Turn {turn} of {turns}. Ghost {flag:ghost}.';
+  q.turnLabel = { zh: '第 {n} 月（{stat:m}）', en: 'Month {n} / {turn}' };
+  assert.ok(validatePack(q));
+  const w = packWarnings(q);
+  for (const re of [
+    /^pack title: \{stat:m\} is not filled here \(title\/intro are shown raw\)$/,
+    /^pack title: \{flag:done\?yes\|no\} is not filled here \(title\/intro are shown raw\)$/,
+    /^pack intro: \{turn\} is not filled here \(title\/intro are shown raw\)$/,
+    /^pack intro: \{turns\} is not filled here \(title\/intro are shown raw\)$/,
+    /^pack intro: \{flag:ghost\} is not filled here \(title\/intro are shown raw\)$/,
+    /^pack turnLabel: \{stat:m\} is not filled here \(only \{n\} becomes the turn number\)$/,
+    /^pack turnLabel: \{turn\} is not filled here \(only \{n\} becomes the turn number\)$/,
+  ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
+  assert.equal(w.length, 7, w.join('\n'));
+  // {n} alone in turnLabel must stay quiet
+  assert.deepEqual(packWarnings({ ...p, turnLabel: 'Turn {n}' }), []);
+});

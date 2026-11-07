@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- `packWarnings()` flags fill-style placeholders (`{stat:…}`, `{flag:…}`, `{turn}` /
+  `{turns}`) in pack-level `title` / `intro` / `turnLabel`. The demo shows title and intro
+  raw (i18n only) and only substitutes `{n}` in `turnLabel`, so those would otherwise sit on
+  screen as written. `{n}` in `turnLabel` is not warned. Both bundled packs: no warnings;
+  simulator behaviour unchanged.
 - `packWarnings()` flags `turn` conditions that can never be true (`min` > `max`, `min` above
   the pack's `turns`, `max` below 1) and soft-warns when a turn range goes past `1..turns`,
   in event / choice / ending `when` (including inside `all` / `any` / `not`), with a path in
