@@ -249,6 +249,7 @@ export function packWarnings(pack) {
   }
   impossibleConditions(pack, warns);
   badPlaceholders(pack, warns);
+  metaPlaceholders(pack, warns);
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
   for (const f of set) if (!checked.has(f)) warns.push(`flag "${f}" is set but never checked`);
@@ -313,6 +314,29 @@ function impossibleConditions(pack, warns) {
     for (const [i, c] of (e.choices ?? []).entries()) walk(c.when, `${e.id}: choice ${i + 1} when`);
   }
   for (const [i, e] of (pack.endings ?? []).entries()) walk(e.when, `ending ${e.id ?? i + 1}: when`);
+}
+
+
+// Pack title / intro are shown raw (i18n only); turnLabel only substitutes `{n}`.
+// fill()-style placeholders there end up on screen as written — warn so authors notice.
+function metaPlaceholders(pack, warns) {
+  const scan = (text, where) => {
+    const strings = typeof text === 'string' ? [text] : text && typeof text === 'object' ? Object.values(text) : [];
+    const found = new Set();
+    for (const s of strings) {
+      if (typeof s !== 'string') continue;
+      for (const m of s.matchAll(/\{stat:[\w-]+(?:\?[^|}]*\|[^}]*)?\}/g)) found.add(m[0]);
+      for (const m of s.matchAll(/\{flag:[\w-]+[^}]*\}/g)) found.add(m[0]);
+      for (const m of s.matchAll(/\{turns?\}/g)) found.add(m[0]);
+    }
+    const hint = where === 'pack turnLabel'
+      ? 'is not filled here (only {n} becomes the turn number)'
+      : 'is not filled here (title/intro are shown raw)';
+    for (const m of found) warns.push(`${where}: ${m} ${hint}`);
+  };
+  scan(pack.title, 'pack title');
+  scan(pack.intro, 'pack intro');
+  scan(pack.turnLabel, 'pack turnLabel');
 }
 
 // Every piece of text the demo runs through fill(): event / ending title and text, choice label
