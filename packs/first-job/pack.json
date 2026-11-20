@@ -1,127 +1,127 @@
 {
   "id": "first-job",
-  "title": { "zh": "入职半年", "en": "Six Months In" },
-  "intro": { "zh": "你拿到了第一份工作。合同写的试用期六个月。", "en": "You got your first job. The contract says six months' probation." },
+  "title": { "zh": "入职半年", "en": "Six Months In", "ja": "入社して半年" },
+  "intro": { "zh": "你拿到了第一份工作。合同写的试用期六个月。", "en": "You got your first job. The contract says six months' probation.", "ja": "はじめての仕事が決まった。契約書には試用期間 6 か月とある。" },
   "turns": 6,
   "perTurn": 2,
-  "turnLabel": { "zh": "第 {n} 个月", "en": "Month {n}" },
+  "turnLabel": { "zh": "第 {n} 个月", "en": "Month {n}", "ja": "{n} か月目" },
   "perTurnEffect": { "money": 300, "energy": 5 },
   "stats": {
-    "energy": { "label": { "zh": "精力", "en": "Energy" }, "initial": 70, "min": 0, "max": 100 },
-    "mood":   { "label": { "zh": "心情", "en": "Mood" },   "initial": 60, "min": 0, "max": 100 },
-    "skill":  { "label": { "zh": "能力", "en": "Skill" },  "initial": 10, "min": 0, "max": 100 },
-    "money":  { "label": { "zh": "存款", "en": "Savings" }, "initial": 200, "min": 0, "max": 99999 }
+    "energy": { "label": { "zh": "精力", "en": "Energy", "ja": "体力" }, "initial": 70, "min": 0, "max": 100 },
+    "mood":   { "label": { "zh": "心情", "en": "Mood", "ja": "気分" },   "initial": 60, "min": 0, "max": 100 },
+    "skill":  { "label": { "zh": "能力", "en": "Skill", "ja": "スキル" },  "initial": 10, "min": 0, "max": 100 },
+    "money":  { "label": { "zh": "存款", "en": "Savings", "ja": "貯金" }, "initial": 200, "min": 0, "max": 99999 }
   },
   "events": [
     { "id": "day_one", "fixed": 1,
-      "title": { "zh": "第一天", "en": "Day one" },
-      "text": { "zh": "工位上只有一台电脑和一张便签：「密码问隔壁」。", "en": "Your desk has a laptop and a sticky note: \"ask next door for the password\"." },
+      "title": { "zh": "第一天", "en": "Day one", "ja": "初日" },
+      "text": { "zh": "工位上只有一台电脑和一张便签：「密码问隔壁」。", "en": "Your desk has a laptop and a sticky note: \"ask next door for the password\".", "ja": "デスクにはノートパソコンと付箋が一枚。「パスワードは隣に聞いて」。" },
       "choices": [
-        { "label": { "zh": "去问隔壁", "en": "Ask next door" }, "effect": { "mood": 3, "flag": "met_neighbor" }, "result": { "zh": "隔壁顺手带你认了一圈人。", "en": "They walk you around and introduce everyone." } },
-        { "label": { "zh": "自己翻文档", "en": "Dig through the docs" }, "effect": { "skill": 3, "energy": -5 }, "result": { "zh": "密码在一份三年前的文档里。", "en": "The password was in a doc from three years ago." } }
+        { "label": { "zh": "去问隔壁", "en": "Ask next door", "ja": "隣に聞く" }, "effect": { "mood": 3, "flag": "met_neighbor" }, "result": { "zh": "隔壁顺手带你认了一圈人。", "en": "They walk you around and introduce everyone.", "ja": "ついでに隣の人がみんなに紹介してくれた。" } },
+        { "label": { "zh": "自己翻文档", "en": "Dig through the docs", "ja": "自分で資料を探す" }, "effect": { "skill": 3, "energy": -5 }, "result": { "zh": "密码在一份三年前的文档里。", "en": "The password was in a doc from three years ago.", "ja": "パスワードは 3 年前の資料に書いてあった。" } }
       ] },
     { "id": "lunch", "turns": [1, 6], "weight": 2,
-      "title": { "zh": "午饭", "en": "Lunch" },
-      "text": { "zh": "同事问要不要一起点外卖。", "en": "A coworker asks if you want to order in together." },
+      "title": { "zh": "午饭", "en": "Lunch", "ja": "昼ごはん" },
+      "text": { "zh": "同事问要不要一起点外卖。", "en": "A coworker asks if you want to order in together.", "ja": "同僚に「一緒に出前取る？」と聞かれた。" },
       "choices": [
-        { "label": { "zh": "一起点", "en": "Sure" }, "effect": { "money": -40, "mood": 4 }, "result": { "zh": "聊了半小时没营养的话，挺开心。", "en": "Half an hour of pointless chat. Nice, actually." } },
-        { "label": { "zh": "吃自己带的", "en": "Eat what you brought" }, "effect": { "money": 10, "mood": -1 }, "result": { "zh": "便当有点凉。", "en": "The bento is a bit cold." } }
+        { "label": { "zh": "一起点", "en": "Sure", "ja": "一緒に頼む" }, "effect": { "money": -40, "mood": 4 }, "result": { "zh": "聊了半小时没营养的话，挺开心。", "en": "Half an hour of pointless chat. Nice, actually.", "ja": "中身のない話で 30 分。なんだか楽しかった。" } },
+        { "label": { "zh": "吃自己带的", "en": "Eat what you brought", "ja": "持ってきたお弁当" }, "effect": { "money": 10, "mood": -1 }, "result": { "zh": "便当有点凉。", "en": "The bento is a bit cold.", "ja": "お弁当は少し冷めていた。" } }
       ] },
     { "id": "late_bug", "turns": [1, 6],
-      "title": { "zh": "下班前的 bug", "en": "A bug at 5:55" },
-      "text": { "zh": "五点五十五，测试群里有人@你。", "en": "5:55 pm. Someone tags you in the QA channel." },
+      "title": { "zh": "下班前的 bug", "en": "A bug at 5:55", "ja": "定時前のバグ" },
+      "text": { "zh": "五点五十五，测试群里有人@你。", "en": "5:55 pm. Someone tags you in the QA channel.", "ja": "17 時 55 分。テストのチャンネルで誰かにメンションされた。" },
       "choices": [
-        { "label": { "zh": "留下来修", "en": "Stay and fix it" }, "effect": { "skill": 5, "energy": -12, "mood": -2 }, "result": { "zh": "修完已经九点，地铁很空。", "en": "Fixed by nine. The train is empty." } },
-        { "label": { "zh": "明早再说", "en": "Tomorrow" }, "effect": { "mood": 2 }, "result": { "zh": "第二天它自己好了。没人知道为什么。", "en": "Next morning it's gone. Nobody knows why." } }
+        { "label": { "zh": "留下来修", "en": "Stay and fix it", "ja": "残って直す" }, "effect": { "skill": 5, "energy": -12, "mood": -2 }, "result": { "zh": "修完已经九点，地铁很空。", "en": "Fixed by nine. The train is empty.", "ja": "直し終わったら 21 時。電車はがらがらだった。" } },
+        { "label": { "zh": "明早再说", "en": "Tomorrow", "ja": "明日にする" }, "effect": { "mood": 2 }, "result": { "zh": "第二天它自己好了。没人知道为什么。", "en": "Next morning it's gone. Nobody knows why.", "ja": "翌朝には直っていた。理由は誰も知らない。" } }
       ] },
     { "id": "course", "turns": [2, 5], "when": { "stat": "money", "min": 400 },
-      "title": { "zh": "网课打折", "en": "Course sale" },
-      "text": { "zh": "收藏很久的网课打五折。", "en": "That course you bookmarked is half off." },
+      "title": { "zh": "网课打折", "en": "Course sale", "ja": "講座のセール" },
+      "text": { "zh": "收藏很久的网课打五折。", "en": "That course you bookmarked is half off.", "ja": "ずっと気になっていたオンライン講座が半額。" },
       "choices": [
-        { "label": { "zh": "买", "en": "Buy it" }, "effect": { "money": -300, "skill": 8, "energy": -4 }, "result": { "zh": "看完了三分之一。也算。", "en": "You finish a third. Counts." } },
-        { "label": { "zh": "再等等", "en": "Wait" }, "result": { "zh": "它又回到原价了。", "en": "Back to full price." } }
+        { "label": { "zh": "买", "en": "Buy it", "ja": "買う" }, "effect": { "money": -300, "skill": 8, "energy": -4 }, "result": { "zh": "看完了三分之一。也算。", "en": "You finish a third. Counts.", "ja": "3 分の 1 まで見た。それでもいい。" } },
+        { "label": { "zh": "再等等", "en": "Wait", "ja": "もう少し待つ" }, "result": { "zh": "它又回到原价了。", "en": "Back to full price.", "ja": "定価に戻った。" } }
       ] },
     { "id": "weekend", "turns": [1, 6], "weight": 2,
-      "title": { "zh": "周末", "en": "Weekend" },
-      "text": { "zh": "难得两天都没安排。", "en": "Two whole days with nothing planned." },
+      "title": { "zh": "周末", "en": "Weekend", "ja": "週末" },
+      "text": { "zh": "难得两天都没安排。", "en": "Two whole days with nothing planned.", "ja": "珍しく、2 日とも予定がない。" },
       "choices": [
-        { "label": { "zh": "睡到中午", "en": "Sleep till noon" }, "effect": { "energy": 15 }, "result": { "zh": "醒来已经是下午了。", "en": "It's afternoon when you wake up." } },
-        { "label": { "zh": "出去走走", "en": "Go out" }, "effect": { "mood": 8, "money": -60, "energy": -3 }, "result": { "zh": "发现了一家很安静的咖啡店。", "en": "You find a very quiet café." } },
-        { "label": { "zh": "写个小项目", "en": "Side project" }, "effect": { "skill": 6, "energy": -6 }, "result": { "zh": "提交记录又绿了一格。", "en": "One more green square." } }
+        { "label": { "zh": "睡到中午", "en": "Sleep till noon", "ja": "昼まで寝る" }, "effect": { "energy": 15 }, "result": { "zh": "醒来已经是下午了。", "en": "It's afternoon when you wake up.", "ja": "起きたらもう午後だった。" } },
+        { "label": { "zh": "出去走走", "en": "Go out", "ja": "散歩に出る" }, "effect": { "mood": 8, "money": -60, "energy": -3 }, "result": { "zh": "发现了一家很安静的咖啡店。", "en": "You find a very quiet café.", "ja": "静かな喫茶店を見つけた。" } },
+        { "label": { "zh": "写个小项目", "en": "Side project", "ja": "小さなものを作る" }, "effect": { "skill": 6, "energy": -6 }, "result": { "zh": "提交记录又绿了一格。", "en": "One more green square.", "ja": "草がまた一マス緑になった。" } }
       ] },
     { "id": "meeting", "turns": [2, 6],
-      "title": { "zh": "周会", "en": "Weekly meeting" },
-      "text": { "zh": "主管问大家这周有什么想法。", "en": "Your manager asks if anyone has ideas this week." },
+      "title": { "zh": "周会", "en": "Weekly meeting", "ja": "週次ミーティング" },
+      "text": { "zh": "主管问大家这周有什么想法。", "en": "Your manager asks if anyone has ideas this week.", "ja": "「今週、何かアイデアある？」と上司。" },
       "choices": [
-        { "label": { "zh": "说一个", "en": "Pitch one" }, "chance": 0.5,
-          "success": { "effect": { "mood": 6, "skill": 3, "flag": "noticed" }, "result": { "zh": "主管说：「这个可以试试。」", "en": "\"Let's try that.\"" } },
-          "failure": { "effect": { "mood": -5 }, "result": { "zh": "会议室安静了两秒。", "en": "Two seconds of silence." } } },
-        { "label": { "zh": "低头记笔记", "en": "Take notes" }, "result": { "zh": "笔记本上画满了方块。", "en": "Your notebook fills up with little squares." } }
+        { "label": { "zh": "说一个", "en": "Pitch one", "ja": "ひとつ出してみる" }, "chance": 0.5,
+          "success": { "effect": { "mood": 6, "skill": 3, "flag": "noticed" }, "result": { "zh": "主管说：「这个可以试试。」", "en": "\"Let's try that.\"", "ja": "「それ、やってみようか」" } },
+          "failure": { "effect": { "mood": -5 }, "result": { "zh": "会议室安静了两秒。", "en": "Two seconds of silence.", "ja": "沈黙が 2 秒続いた。" } } },
+        { "label": { "zh": "低头记笔记", "en": "Take notes", "ja": "うつむいてメモを取る" }, "result": { "zh": "笔记本上画满了方块。", "en": "Your notebook fills up with little squares.", "ja": "ノートが四角い落書きで埋まった。" } }
       ] },
     { "id": "neighbor_help", "turns": [2, 6], "when": { "flag": "met_neighbor" },
-      "title": { "zh": "隔壁求助", "en": "Next door needs a hand" },
-      "text": { "zh": "第一天帮过你的同事卡住了。", "en": "The coworker who helped you on day one is stuck." },
+      "title": { "zh": "隔壁求助", "en": "Next door needs a hand", "ja": "隣からの相談" },
+      "text": { "zh": "第一天帮过你的同事卡住了。", "en": "The coworker who helped you on day one is stuck.", "ja": "初日に助けてくれた同僚が行き詰まっている。" },
       "choices": [
-        { "label": { "zh": "帮忙", "en": "Help" }, "effect": { "energy": -6, "skill": 4, "mood": 4, "flag": "friend" }, "result": { "zh": "他请你喝了一周的咖啡。", "en": "Free coffee for a week." } },
-        { "label": { "zh": "推荐一篇文章", "en": "Send a link" }, "effect": { "mood": -1 }, "result": { "zh": "他说：「好，我看看。」", "en": "\"Thanks, I'll take a look.\"" } }
+        { "label": { "zh": "帮忙", "en": "Help", "ja": "手伝う" }, "effect": { "energy": -6, "skill": 4, "mood": 4, "flag": "friend" }, "result": { "zh": "他请你喝了一周的咖啡。", "en": "Free coffee for a week.", "ja": "一週間、コーヒーをおごってもらった。" } },
+        { "label": { "zh": "推荐一篇文章", "en": "Send a link", "ja": "記事を送る" }, "effect": { "mood": -1 }, "result": { "zh": "他说：「好，我看看。」", "en": "\"Thanks, I'll take a look.\"", "ja": "「ありがとう、読んでみる」" } }
       ] },
     { "id": "cold", "turns": [3, 6], "when": { "stat": "energy", "max": 55 },
-      "title": { "zh": "感冒", "en": "Caught a cold" },
-      "text": { "zh": "嗓子从早上开始就不太对。", "en": "Your throat has felt off since this morning." },
+      "title": { "zh": "感冒", "en": "Caught a cold", "ja": "風邪" },
+      "text": { "zh": "嗓子从早上开始就不太对。", "en": "Your throat has felt off since this morning.", "ja": "朝からのどの調子がおかしい。" },
       "choices": [
-        { "label": { "zh": "请假休息", "en": "Take a sick day" }, "effect": { "energy": 20, "mood": -2 }, "result": { "zh": "睡了一整天。", "en": "You sleep the whole day." } },
-        { "label": { "zh": "硬撑", "en": "Push through" }, "effect": { "energy": -15, "skill": 3, "mood": -6 }, "result": { "zh": "那一周的代码你后来都重写了。", "en": "You rewrote that week's code later." } }
+        { "label": { "zh": "请假休息", "en": "Take a sick day", "ja": "休む" }, "effect": { "energy": 20, "mood": -2 }, "result": { "zh": "睡了一整天。", "en": "You sleep the whole day.", "ja": "一日中寝ていた。" } },
+        { "label": { "zh": "硬撑", "en": "Push through", "ja": "無理して出る" }, "effect": { "energy": -15, "skill": 3, "mood": -6 }, "result": { "zh": "那一周的代码你后来都重写了。", "en": "You rewrote that week's code later.", "ja": "その週のコードは、あとで全部書き直した。" } }
       ] },
     { "id": "crunch", "turns": [2, 6], "when": { "stat": "energy", "max": 70 }, "weight": 2,
-      "title": { "zh": "上线前一周", "en": "Launch week" },
-      "text": { "zh": "上线日期提前了，群里开始有人发「今晚通宵吗」。", "en": "Launch got pulled in. Someone in the chat asks \"all-nighter?\"" },
+      "title": { "zh": "上线前一周", "en": "Launch week", "ja": "リリース前の一週間" },
+      "text": { "zh": "上线日期提前了，群里开始有人发「今晚通宵吗」。", "en": "Launch got pulled in. Someone in the chat asks \"all-nighter?\"", "ja": "リリース日が前倒しに。チャットに「今夜徹夜？」の声。" },
       "choices": [
-        { "label": { "zh": "通宵", "en": "Pull the all-nighter" }, "effect": { "energy": -40, "skill": 5, "money": 150 }, "result": { "zh": "天亮的时候，部署成功了。你不太记得过程。", "en": "It ships at dawn. You don't remember most of it." } },
-        { "label": { "zh": "按时下班", "en": "Leave on time" }, "effect": { "mood": -2 }, "result": { "zh": "第二天大家都很困，只有你醒着。", "en": "Next day everyone's a zombie except you." } }
+        { "label": { "zh": "通宵", "en": "Pull the all-nighter", "ja": "徹夜する" }, "effect": { "energy": -40, "skill": 5, "money": 150 }, "result": { "zh": "天亮的时候，部署成功了。你不太记得过程。", "en": "It ships at dawn. You don't remember most of it.", "ja": "夜明けにデプロイ成功。途中のことはあまり覚えていない。" } },
+        { "label": { "zh": "按时下班", "en": "Leave on time", "ja": "定時で帰る" }, "effect": { "mood": -2 }, "result": { "zh": "第二天大家都很困，只有你醒着。", "en": "Next day everyone's a zombie except you.", "ja": "翌日、みんな眠そうな中で一人だけ元気だった。" } }
       ] },
     { "id": "rent", "fixed": 4,
-      "title": { "zh": "房租涨了", "en": "Rent goes up" },
-      "text": { "zh": "房东发来消息：下个月起每月多两百。你看了眼存款：{stat:money}。", "en": "Landlord texts: +200 a month from next month. You check your savings: {stat:money}." },
+      "title": { "zh": "房租涨了", "en": "Rent goes up", "ja": "家賃の値上げ" },
+      "text": { "zh": "房东发来消息：下个月起每月多两百。你看了眼存款：{stat:money}。", "en": "Landlord texts: +200 a month from next month. You check your savings: {stat:money}.", "ja": "大家さんから連絡。来月から月 200 アップ。貯金を見る：{stat:money}。" },
       "choices": [
-        { "label": { "zh": "认了", "en": "Accept" }, "effect": { "money": -200, "mood": -3 }, "result": { "zh": "好吧。", "en": "Fine." } },
-        { "label": { "zh": "去谈谈", "en": "Negotiate" }, "chance": 0.4,
-          "success": { "effect": { "money": -50, "mood": 5 }, "result": { "zh": "最后只涨了五十。", "en": "Only 50 in the end." } },
-          "failure": { "effect": { "money": -200, "mood": -6 }, "result": { "zh": "房东没回。", "en": "No reply." } } }
+        { "label": { "zh": "认了", "en": "Accept", "ja": "受け入れる" }, "effect": { "money": -200, "mood": -3 }, "result": { "zh": "好吧。", "en": "Fine.", "ja": "仕方ない。" } },
+        { "label": { "zh": "去谈谈", "en": "Negotiate", "ja": "交渉してみる" }, "chance": 0.4,
+          "success": { "effect": { "money": -50, "mood": 5 }, "result": { "zh": "最后只涨了五十。", "en": "Only 50 in the end.", "ja": "結局 50 だけ上がった。" } },
+          "failure": { "effect": { "money": -200, "mood": -6 }, "result": { "zh": "房东没回。", "en": "No reply.", "ja": "返事はなかった。" } } }
       ] },
     { "id": "offer", "turns": [4, 6], "when": { "stat": "skill", "min": 30 },
-      "title": { "zh": "猎头来电", "en": "A recruiter calls" },
-      "text": { "zh": "对方说有个岗位很适合你。", "en": "They say there's a role that fits you perfectly." },
+      "title": { "zh": "猎头来电", "en": "A recruiter calls", "ja": "転職エージェントからの電話" },
+      "text": { "zh": "对方说有个岗位很适合你。", "en": "They say there's a role that fits you perfectly.", "ja": "「ぴったりのポジションがあるんです」" },
       "choices": [
-        { "label": { "zh": "聊聊看", "en": "Hear them out" }, "effect": { "mood": 3, "flag": "has_offer" }, "result": { "zh": "你多了一个选项。", "en": "Now you have options." } },
-        { "label": { "zh": "婉拒", "en": "Decline" }, "effect": { "mood": 1 }, "result": { "zh": "先把这里的事做完。", "en": "Finish what you started here first." } }
+        { "label": { "zh": "聊聊看", "en": "Hear them out", "ja": "話を聞く" }, "effect": { "mood": 3, "flag": "has_offer" }, "result": { "zh": "你多了一个选项。", "en": "Now you have options.", "ja": "選択肢がひとつ増えた。" } },
+        { "label": { "zh": "婉拒", "en": "Decline", "ja": "断る" }, "effect": { "mood": 1 }, "result": { "zh": "先把这里的事做完。", "en": "Finish what you started here first.", "ja": "まずはここでやり切ろう。" } }
       ] },
     { "id": "burnout", "turns": [2, 6], "when": { "any": [{ "stat": "mood", "max": 50 }, { "stat": "energy", "max": 45 }] }, "weight": 3,
-      "title": { "zh": "周日晚上", "en": "Sunday night" },
-      "text": { "zh": "想到明天要上班，胃有点紧。", "en": "Thinking about tomorrow makes your stomach tight." },
+      "title": { "zh": "周日晚上", "en": "Sunday night", "ja": "日曜の夜" },
+      "text": { "zh": "想到明天要上班，胃有点紧。", "en": "Thinking about tomorrow makes your stomach tight.", "ja": "明日のことを考えると、胃が少し重い。" },
       "choices": [
-        { "label": { "zh": "给朋友打电话", "en": "Call a friend" }, "effect": { "mood": 10 }, "result": { "zh": "聊到很晚。", "en": "You talk till late." } },
-        { "label": { "zh": "早点睡", "en": "Sleep early" }, "effect": { "energy": 6, "mood": 3 }, "result": { "zh": "没睡着，但躺着也好。", "en": "Didn't really sleep. Lying down helped." } }
+        { "label": { "zh": "给朋友打电话", "en": "Call a friend", "ja": "友だちに電話する" }, "effect": { "mood": 10 }, "result": { "zh": "聊到很晚。", "en": "You talk till late.", "ja": "遅くまで話した。" } },
+        { "label": { "zh": "早点睡", "en": "Sleep early", "ja": "早めに寝る" }, "effect": { "energy": 6, "mood": 3 }, "result": { "zh": "没睡着，但躺着也好。", "en": "Didn't really sleep. Lying down helped.", "ja": "眠れなかったけど、横になるだけでもよかった。" } }
       ] },
     { "id": "review", "fixed": 6,
-      "title": { "zh": "转正答辩", "en": "Probation review" },
-      "text": { "zh": "最后一周，主管约你聊半小时。", "en": "Last week. Your manager books thirty minutes with you." },
+      "title": { "zh": "转正答辩", "en": "Probation review", "ja": "本採用の面談" },
+      "text": { "zh": "最后一周，主管约你聊半小时。", "en": "Last week. Your manager books thirty minutes with you.", "ja": "最後の週。上司と 30 分の面談が入った。" },
       "choices": [
-        { "label": { "zh": "认真准备", "en": "Prepare properly" }, "effect": { "energy": -8, "skill": 4 }, "result": { "zh": "你把半年做的事列成了一页纸。", "en": "You fit six months onto one page." } },
-        { "label": { "zh": "随便聊聊", "en": "Wing it" }, "effect": { "mood": 2 }, "result": { "zh": "聊着聊着就到点了。", "en": "Time runs out mid-sentence." } }
+        { "label": { "zh": "认真准备", "en": "Prepare properly", "ja": "しっかり準備する" }, "effect": { "energy": -8, "skill": 4 }, "result": { "zh": "你把半年做的事列成了一页纸。", "en": "You fit six months onto one page.", "ja": "半年分の仕事を一枚にまとめた。" } },
+        { "label": { "zh": "随便聊聊", "en": "Wing it", "ja": "気楽に話す" }, "effect": { "mood": 2 }, "result": { "zh": "聊着聊着就到点了。", "en": "Time runs out mid-sentence.", "ja": "話の途中で時間切れになった。" } }
       ] }
   ],
   "endings": [
     { "id": "burned_out", "immediate": true, "when": { "stat": "energy", "max": 0 },
-      "title": { "zh": "撑不住了", "en": "Burned out" }, "text": { "zh": "你请了长假。工作会有的，先把自己找回来。", "en": "You take a long leave. There'll be other jobs; get yourself back first." } },
+      "title": { "zh": "撑不住了", "en": "Burned out", "ja": "もう限界" }, "text": { "zh": "你请了长假。工作会有的，先把自己找回来。", "en": "You take a long leave. There'll be other jobs; get yourself back first.", "ja": "長めの休みを取った。仕事はまた見つかる。まずは自分を取り戻そう。" } },
     { "id": "moving_on", "when": [{ "flag": "has_offer" }, { "stat": "skill", "min": 40 }],
-      "title": { "zh": "下一站", "en": "Next stop" }, "text": { "zh": "转正通过的那天，你也接了新 offer。", "en": "The day you pass probation, you accept the other offer too." } },
+      "title": { "zh": "下一站", "en": "Next stop", "ja": "次の場所へ" }, "text": { "zh": "转正通过的那天，你也接了新 offer。", "en": "The day you pass probation, you accept the other offer too.", "ja": "本採用が決まった日、別の内定も受けることにした。" } },
     { "id": "promoted", "when": [{ "stat": "skill", "min": 35 }, { "flag": "noticed" }],
-      "title": { "zh": "顺利转正", "en": "Made it" }, "text": { "zh": "主管说：「下季度那个项目交给你。」", "en": "\"Next quarter's project is yours.\"" } },
+      "title": { "zh": "顺利转正", "en": "Made it", "ja": "本採用" }, "text": { "zh": "主管说：「下季度那个项目交给你。」", "en": "\"Next quarter's project is yours.\"", "ja": "「来期のあのプロジェクト、任せるよ」" } },
     { "id": "found_people", "when": { "flag": "friend" },
-      "title": { "zh": "有了搭子", "en": "Found your people" }, "text": { "zh": "工作一般，但午饭有人一起吃了。", "en": "The job is okay. You have lunch company now." } },
+      "title": { "zh": "有了搭子", "en": "Found your people", "ja": "仲間ができた" }, "text": { "zh": "工作一般，但午饭有人一起吃了。", "en": "The job is okay. You have lunch company now.", "ja": "仕事はまあまあ。でも、お昼を一緒に食べる人ができた。" } },
     { "id": "passed", "when": { "stat": "skill", "min": 25 },
-      "title": { "zh": "转正了", "en": "Passed" }, "text": { "zh": "没什么波澜，合同续上了。", "en": "No drama. Contract renewed." } },
+      "title": { "zh": "转正了", "en": "Passed", "ja": "本採用になった" }, "text": { "zh": "没什么波澜，合同续上了。", "en": "No drama. Contract renewed.", "ja": "波風なく、契約が更新された。" } },
     { "id": "extended",
-      "title": { "zh": "延长试用", "en": "Extended" }, "text": { "zh": "再给你三个月。", "en": "Three more months." } }
+      "title": { "zh": "延长试用", "en": "Extended", "ja": "試用延長" }, "text": { "zh": "再给你三个月。", "en": "Three more months.", "ja": "あと 3 か月。" } }
   ]
 }
