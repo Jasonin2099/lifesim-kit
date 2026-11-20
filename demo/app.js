@@ -8,11 +8,14 @@ const packId = PACKS.includes(want) ? want : PACKS[0];
 const all = await Promise.all(PACKS.map(async (id) => (await fetch(`packs/${id}/pack.json`)).json()));
 const pack = all[PACKS.indexOf(packId)];
 const KEY = 'lifesim-kit:' + pack.id;
-let lang = localStorage.getItem('lifesim-kit:lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+const LANGS = ['zh', 'en', 'ja'];
+const nav = navigator.language || '';
+let lang = localStorage.getItem('lifesim-kit:lang') || (nav.startsWith('zh') ? 'zh' : nav.startsWith('ja') ? 'ja' : 'en');
+if (!LANGS.includes(lang)) lang = 'en';
 const T = (x) => (x && typeof x === 'object' ? x[lang] ?? x.en ?? Object.values(x)[0] : x ?? '');
 // pack text with {stat:…}/{turn}/{flag:…?a|b} filled in from the current run
 const F = (x) => (game ? fill(T(x), game.state, pack) : T(x));
-const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局', other: '换个剧本' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run', other: 'Other packs' } };
+const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局', other: '换个剧本' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run', other: 'Other packs' }, ja: { start: 'はじめる', again: 'もう一度', next: 'つぎへ', ending: 'エンディング', cont: '続きから', log: '今回の記録', other: 'ほかのシナリオ' } };
 const u = (k) => UI[lang][k];
 const app = document.getElementById('app');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -68,6 +71,9 @@ document.addEventListener('keydown', (ev) => {
   if (btn) { ev.preventDefault(); btn.click(); }
 });
 const lb = document.getElementById('lang');
-const setLang = () => { document.documentElement.lang = lang; lb.textContent = lang === 'zh' ? 'EN' : '中文'; };
-lb.onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; localStorage.setItem('lifesim-kit:lang', lang); setLang(); game ? render() : title(); };
+// the button names the language you switch to: 中文 → EN → 日本語 → 中文
+const NAME = { zh: '中文', en: 'EN', ja: '日本語' };
+const nextLang = () => LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length];
+const setLang = () => { document.documentElement.lang = lang; lb.textContent = NAME[nextLang()]; };
+lb.onclick = () => { lang = nextLang(); localStorage.setItem('lifesim-kit:lang', lang); setLang(); game ? render() : title(); };
 setLang(); title();
