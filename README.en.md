@@ -35,7 +35,7 @@ The last two lines of the simulator output (`never seen events`, `unreached endi
 
 ## Writing a pack
 
-Every field is listed in [docs/pack-format.md](docs/pack-format.md); the [Chinese README](README.md#写自己的剧本) has a full example. Text fields can be a string or `{ "zh": "…", "en": "…" }`; the engine never reads text, only the UI does.
+Every field is listed in [docs/pack-format.md](docs/pack-format.md); the [Chinese README](README.md#写自己的剧本) has a full example. Text fields can be a string or `{ "zh": "…", "en": "…", "ja": "…" }` (the demo switches 中文 / EN / 日本語); the engine never reads text, only the UI does.
 
 ```js
 import { createGame } from './engine/game.js';

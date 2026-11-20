@@ -2,8 +2,9 @@
 
 A pack is one JSON file, by convention `packs/<id>/pack.json` (the demo loads it with
 `?pack=<id>` once the id is added to `PACKS` in `demo/app.js`; a test checks the two match). The engine only reads numbers, ids and conditions; text is
-for the UI. Any text field can be a plain string or `{ "zh": "…", "en": "…" }`, and
-can contain [placeholders](#text-placeholders).
+for the UI. Any text field can be a plain string or a language map such as
+`{ "zh": "…", "en": "…", "ja": "…" }` (the demo shows `zh`, `en` and `ja`, and falls back
+to `en` for a missing language), and can contain [placeholders](#text-placeholders).
 
 `validatePack()` throws on the mistakes in **bold**; `packWarnings()` (printed by the
 simulator) lists things that load fine but are probably wrong.

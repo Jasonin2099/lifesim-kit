@@ -77,7 +77,7 @@ unreached endings: burned_out
 }
 ```
 
-文字字段可以是字符串，也可以是 `{ "zh": "…", "en": "…" }`，引擎不碰文字，只有 UI 会读。
+文字字段可以是字符串，也可以是 `{ "zh": "…", "en": "…", "ja": "…" }`（演示页可切换 中文 / EN / 日本語，缺的语言回落到 en），引擎不碰文字，只有 UI 会读。
 
 ```js
 import { createGame } from './engine/game.js';
