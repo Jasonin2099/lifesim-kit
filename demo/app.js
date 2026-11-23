@@ -51,7 +51,7 @@ function render() {
   localStorage.setItem(KEY, game.save());
   const s = game.state;
   const head = `<p class="muted">${esc(T(pack.turnLabel).replace('{n}', s.turn))} / ${pack.turns}</p>${stats()}`;
-  const res = last ? `<div class="card result">${esc(F(last.result))}<div class="delta">${deltas(last.changes)}</div></div>` : '';
+  const res = last ? `<div class="card result">${esc(F(last.result))}<div class="delta">${esc(deltas(last.changes))}</div></div>` : '';
   if (s.ended) {
     localStorage.removeItem(KEY);
     const e = game.ending();

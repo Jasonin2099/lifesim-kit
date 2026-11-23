@@ -20,6 +20,10 @@
   the message. `{ "turn": 3 }` stays a `validatePack()` error. Both bundled packs: no
   warnings; simulator behaviour unchanged.
 
+### Fixed
+- Demo: the stat changes under a choice's result were inserted as raw HTML, so a stat label
+  containing `<` or `&` broke the card (the ending timeline already escaped them). Now escaped.
+
 ## 0.2.0 — 2026-11-06
 
 ### Changed (behaviour)
