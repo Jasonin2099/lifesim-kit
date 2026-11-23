@@ -250,6 +250,7 @@ export function packWarnings(pack) {
   impossibleConditions(pack, warns);
   badPlaceholders(pack, warns);
   metaPlaceholders(pack, warns);
+  translationGaps(pack, warns);
   const { checked, set } = flagUse(pack);
   for (const f of checked) if (!set.has(f)) warns.push(`flag "${f}" is checked but never set`);
   for (const f of set) if (!checked.has(f)) warns.push(`flag "${f}" is set but never checked`);
@@ -340,26 +341,29 @@ function metaPlaceholders(pack, warns) {
 }
 
 // Every piece of text the demo runs through fill(): event / ending title and text, choice label
-// and results. Calls fn(strings, where) with the plain string or the per-language values.
-function eachText(pack, fn) {
-  const scan = (text, where) => {
-    const strings = typeof text === 'string' ? [text] : text && typeof text === 'object' ? Object.values(text) : [];
-    fn(strings.filter((s) => typeof s === 'string'), where);
-  };
+// and results. eachTextMap calls fn(text, where) with the raw field (string or language map);
+// eachText calls fn(strings, where) with the plain string or the per-language values.
+function eachTextMap(pack, fn) {
   for (const e of pack.events ?? []) {
-    scan(e.title, `${e.id}: title`);
-    scan(e.text, `${e.id}: text`);
+    fn(e.title, `${e.id}: title`);
+    fn(e.text, `${e.id}: text`);
     for (const [i, c] of (e.choices ?? []).entries()) {
-      scan(c.label, `${e.id}: choice ${i + 1} label`);
-      scan(c.result, `${e.id}: choice ${i + 1} result`);
-      scan(c.success?.result, `${e.id}: choice ${i + 1} success result`);
-      scan(c.failure?.result, `${e.id}: choice ${i + 1} failure result`);
+      fn(c.label, `${e.id}: choice ${i + 1} label`);
+      fn(c.result, `${e.id}: choice ${i + 1} result`);
+      fn(c.success?.result, `${e.id}: choice ${i + 1} success result`);
+      fn(c.failure?.result, `${e.id}: choice ${i + 1} failure result`);
     }
   }
   for (const [i, e] of (pack.endings ?? []).entries()) {
-    scan(e.title, `ending ${e.id ?? i + 1}: title`);
-    scan(e.text, `ending ${e.id ?? i + 1}: text`);
+    fn(e.title, `ending ${e.id ?? i + 1}: title`);
+    fn(e.text, `ending ${e.id ?? i + 1}: text`);
   }
+}
+function eachText(pack, fn) {
+  eachTextMap(pack, (text, where) => {
+    const strings = typeof text === 'string' ? [text] : text && typeof text === 'object' ? Object.values(text) : [];
+    fn(strings.filter((s) => typeof s === 'string'), where);
+  });
 }
 
 // `{stat:x}` with a stat the pack doesn't have is left as it is by fill(), so the raw
@@ -378,3 +382,30 @@ function badPlaceholders(pack, warns) {
     for (const m of flags) warns.push(`${where}: ${m} needs ?yes|no (like {flag:x?yes|no}), it will show up as is`);
   });
 }
+
+// Language maps: once any text in the pack is a `{ "zh": …, "en": …, "ja": … }` map, every map
+// should carry the same languages (a missing one silently falls back to `en` in the demo), and
+// each language should use the same placeholders (`{flag:x?yes|no}` compares by flag only,
+// since the yes / no words are translated). Plain strings are language-neutral and skipped.
+function translationGaps(pack, warns) {
+  const maps = [];
+  const add = (text, where) => { if (text && typeof text === 'object' && !Array.isArray(text)) maps.push([text, where]); };
+  add(pack.title, 'pack title');
+  add(pack.intro, 'pack intro');
+  add(pack.turnLabel, 'pack turnLabel');
+  for (const [k, d] of Object.entries(pack.stats ?? {})) add(d?.label, `stat ${k}: label`);
+  eachTextMap(pack, add);
+  const langs = [...new Set(maps.flatMap(([m]) => Object.keys(m).filter((l) => typeof m[l] === 'string')))];
+  if (langs.length < 2) return;
+  const keys = (s) => [...s.matchAll(/\{(?:(stat|flag):([\w-]+)[^}]*|(turns?|n))\}/g)]
+    .map(([, kind, key, t]) => (t ? `{${t}}` : `{${kind}:${key}}`)).sort().join(' ');
+  for (const [m, where] of maps) {
+    const missing = langs.filter((l) => typeof m[l] !== 'string' || !m[l].trim());
+    if (missing.length) warns.push(`${where}: no ${missing.join(' / ')} text (the pack uses ${langs.join(' / ')} elsewhere)`);
+    const have = langs.filter((l) => !missing.includes(l));
+    const ref = have.includes('en') ? 'en' : have[0];
+    for (const l of have) if (l !== ref && keys(m[l]) !== keys(m[ref]))
+      warns.push(`${where}: ${l} placeholders (${keys(m[l]) || 'none'}) differ from ${ref} (${keys(m[ref]) || 'none'})`);
+  }
+}
+

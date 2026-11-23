@@ -5,6 +5,10 @@ A pack is one JSON file, by convention `packs/<id>/pack.json` (the demo loads it
 for the UI. Any text field can be a plain string or a language map such as
 `{ "zh": "…", "en": "…", "ja": "…" }` (the demo shows `zh`, `en` and `ja`, and falls back
 to `en` for a missing language), and can contain [placeholders](#text-placeholders).
+Once a pack uses language maps, `packWarnings()` lists maps that lack a language used
+elsewhere in the pack (stat labels and pack `title` / `intro` / `turnLabel` included), and
+languages whose placeholders differ from `en` (`{flag:x?yes|no}` is compared by flag only,
+since the yes / no words are translated). Plain strings are not checked.
 
 `validatePack()` throws on the mistakes in **bold**; `packWarnings()` (printed by the
 simulator) lists things that load fine but are probably wrong.
