@@ -550,7 +550,40 @@ test('packWarnings: fill-style placeholders in pack title / intro / turnLabel', 
     /^pack turnLabel: \{stat:m\} is not filled here \(only \{n\} becomes the turn number\)$/,
     /^pack turnLabel: \{turn\} is not filled here \(only \{n\} becomes the turn number\)$/,
   ]) assert.equal(w.filter((x) => re.test(x)).length, 1, `${re}\n${w.join('\n')}`);
-  assert.equal(w.length, 7, w.join('\n'));
+  // (zh and en differ in placeholders on purpose here; that is translationGaps' business)
+  assert.equal(w.filter((x) => !/placeholders \(/.test(x)).length, 7, w.join('\n'));
   // {n} alone in turnLabel must stay quiet
   assert.deepEqual(packWarnings({ ...p, turnLabel: 'Turn {n}' }), []);
+});
+
+test('packWarnings: language maps missing a language or with different placeholders', () => {
+  const p = {
+    id: 'i18n', turns: 2, perTurn: 1,
+    stats: { m: { initial: 5, label: { zh: '钱', en: 'Money', ja: 'お金' } } },
+    title: { zh: '标题', en: 'Title', ja: 'タイトル' },
+    turnLabel: { zh: '第 {n} 月', en: 'Month {n}', ja: '{n} か月目' },
+    events: [{ id: 'e', title: 'plain strings are fine', text: { zh: '还剩 {stat:m}', en: '{stat:m} left', ja: '残り {stat:m}' },
+      choices: [{ label: { zh: '走', en: 'Go', ja: '行く' }, result: { zh: '{flag:x?是|否}', en: '{flag:x?yes|no}', ja: '{flag:x?はい|いいえ}' }, effect: { flag: 'x' } }] }],
+    endings: [{ id: 'won', when: { flag: 'x' }, title: { zh: '完', en: 'End', ja: '終わり' } }, { id: 'fallback' }],
+  };
+  assert.ok(validatePack(p));
+  // translated yes / no words inside {flag:x?…|…} are not a placeholder difference
+  assert.deepEqual(packWarnings(p), []);
+  const q = structuredClone(p);
+  delete q.stats.m.label.ja;
+  q.title.ja = '  ';
+  q.events[0].text.ja = '残りわずか';
+  q.turnLabel.zh = '第几月';
+  q.endings[0].title = { en: 'End' };
+  assert.ok(validatePack(q));
+  assert.deepEqual(packWarnings(q), [
+    'pack title: no ja text (the pack uses zh / en / ja elsewhere)',
+    'pack turnLabel: zh placeholders (none) differ from en ({n})',
+    'stat m: label: no ja text (the pack uses zh / en / ja elsewhere)',
+    'e: text: ja placeholders (none) differ from en ({stat:m})',
+    'ending won: title: no zh / ja text (the pack uses zh / en / ja elsewhere)',
+  ]);
+  // a pack with plain strings or a single language has nothing to compare
+  assert.deepEqual(packWarnings({ ...q, stats: { m: { initial: 5 } }, title: 'T', turnLabel: 'Turn {n}',
+    events: [{ ...q.events[0], text: 'x', choices: [{ label: 'go', effect: { flag: 'x' } }] }], endings: [{ id: 'won', when: { flag: 'x' }, title: { en: 'End' } }, { id: 'fallback' }] }), []);
 });

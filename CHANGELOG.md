@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- `packWarnings()` checks language maps: once any text in a pack is a
+  `{ "zh": …, "en": …, "ja": … }` map, it lists maps that lack one of the pack's languages
+  (the demo would silently show `en` there) and languages whose placeholders differ from
+  `en` — e.g. a translation that dropped `{stat:money}`. Covers event / choice / ending text,
+  stat labels and pack `title` / `intro` / `turnLabel`; `{flag:x?yes|no}` is compared by flag
+  only. Both bundled packs: no warnings; simulator behaviour unchanged.
 - `packWarnings()` flags fill-style placeholders (`{stat:…}`, `{flag:…}`, `{turn}` /
   `{turns}`) in pack-level `title` / `intro` / `turnLabel`. The demo shows title and intro
   raw (i18n only) and only substitutes `{n}` in `turnLabel`, so those would otherwise sit on
