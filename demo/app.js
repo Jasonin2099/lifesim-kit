@@ -5,19 +5,38 @@ import { fill } from '../engine/text.js';
 const PACKS = ['first-job', 'night-market'];
 const want = new URLSearchParams(location.search).get('pack');
 const packId = PACKS.includes(want) ? want : PACKS[0];
-const all = await Promise.all(PACKS.map(async (id) => (await fetch(`packs/${id}/pack.json`)).json()));
+const app = document.getElementById('app');
+// localStorage throws (SecurityError) when the browser blocks site data; fall back to
+// memory so the demo still plays, just without resume / remembered language
+const mem = new Map();
+const store = {
+  get: (k) => { try { return localStorage.getItem(k); } catch { return mem.get(k) ?? null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch { mem.set(k, v); } },
+  del: (k) => { try { localStorage.removeItem(k); } catch { mem.delete(k); } },
+};
+let all;
+try {
+  all = await Promise.all(PACKS.map(async (id) => {
+    const r = await fetch(`packs/${id}/pack.json`);
+    if (!r.ok) throw new Error(`packs/${id}/pack.json: HTTP ${r.status}`);
+    return r.json();
+  }));
+} catch (err) {
+  app.innerHTML = '<p class="muted"></p>';
+  app.firstChild.textContent = `Could not load the packs (${err.message}). Serve the folder over HTTP, e.g. npm run serve.`;
+  throw err;
+}
 const pack = all[PACKS.indexOf(packId)];
 const KEY = 'lifesim-kit:' + pack.id;
 const LANGS = ['zh', 'en', 'ja'];
 const nav = navigator.language || '';
-let lang = localStorage.getItem('lifesim-kit:lang') || (nav.startsWith('zh') ? 'zh' : nav.startsWith('ja') ? 'ja' : 'en');
+let lang = store.get('lifesim-kit:lang') || (nav.startsWith('zh') ? 'zh' : nav.startsWith('ja') ? 'ja' : 'en');
 if (!LANGS.includes(lang)) lang = 'en';
 const T = (x) => (x && typeof x === 'object' ? x[lang] ?? x.en ?? Object.values(x)[0] : x ?? '');
 // pack text with {stat:…}/{turn}/{flag:…?a|b} filled in from the current run
 const F = (x) => (game ? fill(T(x), game.state, pack) : T(x));
 const UI = { zh: { start: '开始', again: '再来一局', next: '继续', ending: '结局', cont: '继续上次', log: '这一局', other: '换个剧本' }, en: { start: 'Start', again: 'Play again', next: 'Continue', ending: 'Ending', cont: 'Resume', log: 'This run', other: 'Other packs' }, ja: { start: 'はじめる', again: 'もう一度', next: 'つぎへ', ending: 'エンディング', cont: '続きから', log: '今回の記録', other: 'ほかのシナリオ' } };
 const u = (k) => UI[lang][k];
-const app = document.getElementById('app');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 let game = null, last = null;
 const deltas = (cs) => cs.map((c) => `${T(pack.stats[c.key].label)} ${c.delta > 0 ? '+' : ''}${c.delta}`).join(' · ');
@@ -39,21 +58,21 @@ function timeline() {
   return rows.length ? `<details class="card log"><summary>${u('log')} (${rows.length})</summary><ol>${rows.join('')}</ol></details>` : '';
 }
 function title() {
-  const saved = localStorage.getItem(KEY);
+  const saved = store.get(KEY);
   app.innerHTML = `<h1>${esc(T(pack.title))}</h1><p>${esc(T(pack.intro))}</p>
     <button class="primary" id="go">${u('start')}</button> ${saved ? `<button class="choice" id="resume" style="display:inline-block;width:auto">${u('cont')}</button>` : ''}
     <p class="muted">${u('other')}: ${all.filter((p) => p.id !== pack.id).map((p) => `<a href="?pack=${encodeURIComponent(p.id)}">${esc(T(p.title))}</a>`).join(' · ')}</p>`;
   document.getElementById('go').onclick = () => { game = createGame(pack); last = null; render(); };
   const r = document.getElementById('resume');
-  if (r) r.onclick = () => { try { game = loadGame(pack, saved); render(); } catch { localStorage.removeItem(KEY); title(); } };
+  if (r) r.onclick = () => { try { game = loadGame(pack, saved); render(); } catch { store.del(KEY); title(); } };
 }
 function render() {
-  localStorage.setItem(KEY, game.save());
+  store.set(KEY, game.save());
   const s = game.state;
   const head = `<p class="muted">${esc(T(pack.turnLabel).replace('{n}', s.turn))} / ${pack.turns}</p>${stats()}`;
   const res = last ? `<div class="card result">${esc(F(last.result))}<div class="delta">${esc(deltas(last.changes))}</div></div>` : '';
   if (s.ended) {
-    localStorage.removeItem(KEY);
+    store.del(KEY);
     const e = game.ending();
     app.innerHTML = head + res + `<div class="card"><p class="muted">${u('ending')}</p><h2>${esc(F(e?.title))}</h2><p>${esc(F(e?.text))}</p></div>${timeline()}<button class="primary" id="again">${u('again')}</button>`;
     document.getElementById('again').onclick = () => { game = createGame(pack); last = null; render(); };
@@ -75,5 +94,5 @@ const lb = document.getElementById('lang');
 const NAME = { zh: '中文', en: 'EN', ja: '日本語' };
 const nextLang = () => LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length];
 const setLang = () => { document.documentElement.lang = lang; lb.textContent = NAME[nextLang()]; };
-lb.onclick = () => { lang = nextLang(); localStorage.setItem('lifesim-kit:lang', lang); setLang(); game ? render() : title(); };
+lb.onclick = () => { lang = nextLang(); store.set('lifesim-kit:lang', lang); setLang(); game ? render() : title(); };
 setLang(); title();

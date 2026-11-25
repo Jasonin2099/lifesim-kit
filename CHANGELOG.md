@@ -21,6 +21,9 @@
   warnings; simulator behaviour unchanged.
 
 ### Fixed
+- Demo: when the browser blocks site data, reading `localStorage` throws, and the demo
+  stayed on "loading…". It now falls back to memory (no resume / remembered language in
+  that case). If a pack file can't be fetched, the page says so instead of hanging.
 - Demo: the stat changes under a choice's result were inserted as raw HTML, so a stat label
   containing `<` or `&` broke the card (the ending timeline already escaped them). Now escaped.
 
